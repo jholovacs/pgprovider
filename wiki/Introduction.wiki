@@ -6,6 +6,11 @@ I've spent quite a bit of time trying to find a decent set of ASP.NET membership
 
 So now, I won't have to worry about it; and hopefully, other people will not have to feel the frustration I felt.
 
+= Status =
+ * The MembershipProvider is complete, and unit tests are available to be run.
+ * The RoleProvider is incomplete, and unit tests have not been written yet.
+ * The ProfileProvider has not been started, and unit tests have not been written yet.
+
 = Details =
 
 The solution is meant to work in Visual Studio 2010.  I have not tested it in Mono, but it should work with Mono as well.  The solution has two projects:
@@ -20,5 +25,6 @@ You will need:
  * Unfettered access to a blank PostgreSQL database with an account that can make DDL changes in the database.
  * Npgsql class library (third party)
  * log4net class library (third party)
+ * For the unit tests, the NUnit library is required.
 
 That _should_ be it.  Please see the [Installation Instructions] for information on how to set up your database and connection.

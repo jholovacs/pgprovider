@@ -1,0 +1,31 @@
+= Introduction = 
+Here's a quick rundown of what you need to set up to get things going.
+
+= Create the PostgreSQL Database =
+How to do this is out of scope for this document, but there's lots of information to look at online.
+
+You will also need to create a user to own the database.  I recommend naming the database and the user "security", but you don't have to.  If you name the user something else, however, you will need to change the ddl scripts to properly reflect the object owners.
+
+The important thing here is that the Npgsql-based client can connect to the database, so the connection string in the web/app.config must be correct.  Another common "gotcha" is that your PostgreSQL server may not be listening, or your credentials are not adequate to connect to the database.
+
+= Create the database objects =
+Create the tables and functions as scripted in the *pgProvider\ddl* directory in the *pgProvider* project.  You will need elevated permissions to do this.
+
+*Note:* The scripts are written expecting the owner of the database objects to be the "security" account.  If your account is named differently, you will need to modify the scripts accordingly.
+
+The order of some of the scripts is important; some scripts are generating objects that depend on others.  Execute the scripts in this order:
+
+ # the *users* table
+ # the *roles* table
+ # the *profiles* table
+ # everything else
+
+= Configure the providers in the web.config =
+For the various provider configuration options, look here:
+ 
+ * [ConfiguringTheMembershipProvider Configuring the MembershipProvider]
+ * [ConfiguringTheRoleProvider Configuring the RoleProvider]
+ * [ConfiguringTheProfileProvider Configuring the ProfileProvider]
+
+= Do your stuff! =
+That's all there is to it.

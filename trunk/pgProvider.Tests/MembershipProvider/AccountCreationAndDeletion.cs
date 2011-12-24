@@ -10,38 +10,38 @@ namespace pgProvider.Tests.MembershipProvider
 		#region Setup
 
 		private pgMembershipProvider provider;
-		private NameValueCollection config;
+		private NameValueCollection mconfig;
 		private MembershipCreateStatus status;
 
 		[TestFixtureSetUp]
 		protected void TestSetup()
 		{
 			provider = new pgMembershipProvider();
-			config = new NameValueCollection();
-			config.Add("connectionStringName", "pgProvider");
-			config.Add("enablePasswordRetrieval", "false");
-			config.Add("enablePasswordReset", "true");
-			config.Add("maxInvalidPasswordAttempts", "5");
-			config.Add("minRequiredNonAlphanumericCharacters", "0");
-			config.Add("passwordAttemptWindow", "5");
-			config.Add("lockoutTime", "0");
-			config.Add("sessionTime", "15");
-			config.Add("passwordStrengthRegularExpression", "");
-			config.Add("requiresQuestionAndAnswer", "false");
-			config.Add("requiresUniqueEmail", "true");
-			config.Add("applicationName", "NUnit Provider Test");
-			config.Add("encryptionKey", "");
-			config.Add("minSaltCharacters", "30");
-			config.Add("maxSaltCharacters", "60");
-			config.Add("minRequiredPasswordLength", "6");
+			mconfig = new NameValueCollection();
+			mconfig.Add("connectionStringName", "pgProvider");
+			mconfig.Add("enablePasswordRetrieval", "false");
+			mconfig.Add("enablePasswordReset", "true");
+			mconfig.Add("maxInvalidPasswordAttempts", "5");
+			mconfig.Add("minRequiredNonAlphanumericCharacters", "0");
+			mconfig.Add("passwordAttemptWindow", "5");
+			mconfig.Add("lockoutTime", "0");
+			mconfig.Add("sessionTime", "15");
+			mconfig.Add("passwordStrengthRegularExpression", "");
+			mconfig.Add("requiresQuestionAndAnswer", "false");
+			mconfig.Add("requiresUniqueEmail", "true");
+			mconfig.Add("applicationName", "NUnit Provider Test");
+			mconfig.Add("encryptionKey", "");
+			mconfig.Add("minSaltCharacters", "30");
+			mconfig.Add("maxSaltCharacters", "60");
+			mconfig.Add("minRequiredPasswordLength", "6");
 		}
 
 		protected void TestInitialize()
 		{
-			provider.Initialize("pgMembershipProvider", config);
+			provider.Initialize("pgMembershipProvider", mconfig);
 		}
 
-		#endregion
+        #endregion
 
 		#region Tests
 		[Test]
@@ -58,7 +58,7 @@ namespace pgProvider.Tests.MembershipProvider
 				null,
 				out status);
 
-			Assert.IsTrue(status == MembershipCreateStatus.Success);
+			Assert.IsTrue(status == MembershipCreateStatus.Success, "MembershipCreateStatus was not Success.");
 
 			provider.DeleteUser("testUser", true);
 			Assert.IsTrue(provider.GetUser("testUser", false) == null);

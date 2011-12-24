@@ -44,6 +44,7 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -53,7 +54,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CredentialPackage.cs" />
-    <Content Include="ddl\functions\create_role.sql" />
     <Compile Include="EncryptionMethods.cs" />
     <Compile Include="Exceptions\AccountLockedException.cs" />
     <Compile Include="Exceptions\AccountNotApprovedException.cs" />
@@ -70,27 +70,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ddl\functions\assign_users_to_roles.sql" />
-    <Content Include="ddl\functions\delete_role.sql" />
-    <Content Include="ddl\functions\delete_user.sql" />
-    <Content Include="ddl\functions\get_users.sql" />
-    <Content Include="ddl\functions\record_login_event.sql" />
-    <Content Include="ddl\functions\unlock_user.sql" />
-    <Content Include="ddl\tables\roles.sql" />
-    <Content Include="ddl\tables\users.sql" />
-    <Content Include="ddl\tables\users_roles.sql" />
-    <Content Include="ddl\tables\user_login_activity.sql" />
+    <Content Include="ddl\ScriptDatabase.sql" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="ddl\functions\create_user.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="ddl\functions\get_user_credentials.sql" />
-    <Content Include="ddl\functions\get_user_name_by_email.sql" />
-    <Content Include="ddl\functions\update_user.sql" />
-    <Content Include="ddl\functions\update_user_password.sql" />
-    <Content Include="ddl\functions\update_user_q_and_a.sql" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

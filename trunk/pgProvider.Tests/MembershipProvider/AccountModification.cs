@@ -195,6 +195,40 @@ namespace pgProvider.Tests.MembershipProvider
 			Assert.IsTrue(user == null);
 		}
 
+        [Test]
+        public void UniqueEmailConstraintPreventsDuplicateEmail()
+        {
+            TestInitialize();
+            var testUser2 = provider.CreateUser(
+                "testUser2",
+                defaultPassword,
+                "test@foo.com",
+                "What is your favorite color?",
+                "Blue!",
+                true,
+                null,
+                out status);
+            Assert.IsNull(testUser2);
+            Assert.IsTrue(status == MembershipCreateStatus.DuplicateEmail);
+        }
+
+        [Test]
+        public void DuplicateUserNameReturnsProperMessage()
+        {
+            TestInitialize();
+            var testUser2 = provider.CreateUser(
+                "testUser",
+                defaultPassword,
+                "test@foo4U.com",
+                "What is your favorite color?",
+                "Blue!",
+                true,
+                null,
+                out status);
+            Assert.IsNull(testUser2);
+            Assert.IsTrue(status == MembershipCreateStatus.DuplicateUserName);
+         }
+
 		#endregion
 	}
 }

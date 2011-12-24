@@ -807,9 +807,8 @@ namespace pgProvider
 		public override string ResetPassword(string username, string answer)
 		{
 			if (!_EnablePasswordReset) throw new InvalidOperationException("ResetPassword() cannot be used; password resets are disabled.");
-			if (!_RequiresQuestionAndAnswer) throw new InvalidOperationException("ResetPassword() cannot be used without requiring Questions and Answers");
 
-			if (!ValidateAnswer(username, answer))
+			if (_RequiresQuestionAndAnswer && !ValidateAnswer(username, answer))
 			{
 				Log.Warn(string.Format("User '{0}' failed to validate the security question.", username));
 				return null;

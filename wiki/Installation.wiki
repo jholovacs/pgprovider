@@ -1,3 +1,4 @@
+#summary How to install and use the pgProvider library
 = Introduction = 
 Here's a quick rundown of what you need to set up to get things going.
 

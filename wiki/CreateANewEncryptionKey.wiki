@@ -29,5 +29,5 @@ namespace ConsoleApplication1
     }
 }
 }}}
- * Run the application, and copy the first line of the output into the clipboard.  This is your shiny new encryption key, and it goes into the web.config file as per Configuring the MembershipProvider.
+ * Run the application, and copy the first line of the output into the clipboard.  This is your shiny new encryption key, and it goes into the web.config file as per [ConfiguringTheMembershipProvider Configuring the MembershipProvider].
  * Remove the console application from your solution and and remove the files from the solution folder.

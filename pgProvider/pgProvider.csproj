@@ -88,7 +88,6 @@
   <ItemGroup>
     <Content Include="ddl\functions\get_user_credentials.sql" />
     <Content Include="ddl\functions\get_user_name_by_email.sql" />
-    <Content Include="ddl\functions\get_user_password.sql" />
     <Content Include="ddl\functions\update_user.sql" />
     <Content Include="ddl\functions\update_user_password.sql" />
     <Content Include="ddl\functions\update_user_q_and_a.sql" />

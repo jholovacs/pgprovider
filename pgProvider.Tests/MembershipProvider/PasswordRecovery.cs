@@ -122,12 +122,13 @@ namespace pgProvider.Tests.MembershipProvider
 		}
 
 		[Test]
-		public void ResetPasswordFailsWithoutRequiredQuestionAndAnswer()
+		public void ResetPasswordWorksWithoutRequiredQuestionAndAnswer()
 		{
 			config["enablePasswordReset"] = "true";
 			config["requiresQuestionAndAnswer"] = "false";
 			TestInitialize();
-			Assert.Throws<InvalidOperationException>(() => provider.ResetPassword(user.UserName, "Blue!"));
+			var newPass = provider.ResetPassword(user.UserName, string.Empty);
+            Assert.IsTrue(provider.ValidateUser(user.UserName, newPass));
 		}
 
 		[Test]

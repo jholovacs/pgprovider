@@ -279,9 +279,10 @@ namespace pgProvider
 				using (var comm = new NpgsqlCommand("update_user_password", conn))
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
-					comm.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
-					comm.Parameters.Add("saltchars", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = salt;
-					comm.Parameters.Add("passwordhash", NpgsqlTypes.NpgsqlDbType.Bytea).Value = hash;
+					comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+					comm.Parameters.Add("_salt", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = salt;
+					comm.Parameters.Add("_password", NpgsqlTypes.NpgsqlDbType.Bytea).Value = hash;
 					comm.ExecuteNonQuery();
 				}
 			}
@@ -441,8 +442,9 @@ namespace pgProvider
 				using (var comm = new NpgsqlCommand("update_user_q_and_a", conn))
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
-					comm.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
-					comm.Parameters.Add("questiontext", NpgsqlTypes.NpgsqlDbType.Varchar, 1000).Value = question;
+					comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                    comm.Parameters.Add("questiontext", NpgsqlTypes.NpgsqlDbType.Varchar, 1000).Value = question;
 					comm.Parameters.Add("answersalt", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = salt;
 					comm.Parameters.Add("answerhash", NpgsqlTypes.NpgsqlDbType.Bytea).Value = hash;
 					comm.ExecuteNonQuery();
@@ -464,8 +466,9 @@ namespace pgProvider
 				using (var comm = new NpgsqlCommand("create_user", conn))
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
-					comm.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
-					comm.Parameters.Add("emailaddress", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = email;
+					comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                    comm.Parameters.Add("emailaddress", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = email;
 					comm.Parameters.Add("approved", NpgsqlTypes.NpgsqlDbType.Boolean).Value = isApproved;
 					comm.Parameters.Add("email_is_unique", NpgsqlTypes.NpgsqlDbType.Boolean).Value = _RequiresUniqueEmail;
 					var retval = Convert.ToInt32(comm.ExecuteScalar());
@@ -484,8 +487,9 @@ namespace pgProvider
 					using (var comm = new NpgsqlCommand("delete_user", conn))
 					{
 						comm.CommandType = System.Data.CommandType.StoredProcedure;
-						comm.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
-						comm.Parameters.Add("delete_related", NpgsqlTypes.NpgsqlDbType.Boolean).Value = deleteAllRelatedData;
+						comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
+                        comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                        comm.Parameters.Add("delete_related", NpgsqlTypes.NpgsqlDbType.Boolean).Value = deleteAllRelatedData;
 						comm.ExecuteNonQuery();
 						return true;
 					}
@@ -525,7 +529,8 @@ namespace pgProvider
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
 					comm.Parameters.Add("partial_email", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = emailToMatch;
-					using (var reader = comm.ExecuteReader())
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                    using (var reader = comm.ExecuteReader())
 					{
 						if (reader.HasRows)
 						{
@@ -561,7 +566,8 @@ namespace pgProvider
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
 					comm.Parameters.Add("partial_username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = usernameToMatch;
-					using (var reader = comm.ExecuteReader())
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                    using (var reader = comm.ExecuteReader())
 					{
 						if (reader.HasRows)
 						{
@@ -591,7 +597,8 @@ namespace pgProvider
 				using (var comm = new NpgsqlCommand("get_all_users", conn))
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
-					using (var reader = comm.ExecuteReader())
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                    using (var reader = comm.ExecuteReader())
 					{
 						if (reader.HasRows)
 						{
@@ -616,7 +623,8 @@ namespace pgProvider
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
 					comm.Parameters.Add("session", NpgsqlTypes.NpgsqlDbType.Integer).Value = _SessionTime;
-					return Convert.ToInt32(comm.ExecuteScalar());
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                    return Convert.ToInt32(comm.ExecuteScalar());
 				}
 			}
 		}
@@ -651,8 +659,9 @@ namespace pgProvider
 				using (var comm = new NpgsqlCommand("get_user_by_username", conn))
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
-					comm.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
-					comm.Parameters.Add("online", NpgsqlTypes.NpgsqlDbType.Boolean).Value = userIsOnline;
+					comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                    comm.Parameters.Add("online", NpgsqlTypes.NpgsqlDbType.Boolean).Value = userIsOnline;
 					using (var reader = comm.ExecuteReader())
 					{
 						if (reader.HasRows)
@@ -761,7 +770,8 @@ namespace pgProvider
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
 					comm.Parameters.Add("emailaddress", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = email;
-					return comm.ExecuteScalar().ToString();
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                    return comm.ExecuteScalar().ToString();
 				}
 			}
 		}
@@ -832,8 +842,9 @@ namespace pgProvider
 					using (var comm = new NpgsqlCommand("unlock_user", conn))
 					{
 						comm.CommandType = System.Data.CommandType.StoredProcedure;
-						comm.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = userName;
-						comm.ExecuteNonQuery();
+						comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = userName;
+                        comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                        comm.ExecuteNonQuery();
 						Log.Info(string.Format("User '{0}' has been unlocked.", userName));
 						return true;
 					}
@@ -859,8 +870,9 @@ namespace pgProvider
 					{
 						comm.CommandType = System.Data.CommandType.StoredProcedure;
 						comm.Parameters.Add("userid", NpgsqlTypes.NpgsqlDbType.Integer).Value = (int)user.ProviderUserKey;
-						comm.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = user.UserName;
-						comm.Parameters.Add("emailaddress", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = user.Email;
+						comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = user.UserName;
+                        comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                        comm.Parameters.Add("emailaddress", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = user.Email;
 						comm.Parameters.Add("isapproved", NpgsqlTypes.NpgsqlDbType.Boolean).Value = user.IsApproved;
 						comm.Parameters.Add("comments", NpgsqlTypes.NpgsqlDbType.Varchar, -1).Value = user.Comment;
 						comm.Parameters.Add("email_is_unique", NpgsqlTypes.NpgsqlDbType.Boolean).Value = _RequiresUniqueEmail;
@@ -944,8 +956,9 @@ namespace pgProvider
 					using (var comm = new NpgsqlCommand("record_login_event", conn))
 					{
 						comm.CommandType = System.Data.CommandType.StoredProcedure;
-						comm.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
-						comm.Parameters.Add("origin", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value =
+						comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
+                        comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                        comm.Parameters.Add("origin", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value =
 							string.Format("Machine: {0}, Application: {1}", Environment.MachineName, _ApplicationName);
 						comm.Parameters.Add("success_indicator", NpgsqlTypes.NpgsqlDbType.Boolean).Value = success;
 						comm.Parameters.Add("attempt_window", NpgsqlTypes.NpgsqlDbType.Integer).Value = _PasswordAttemptWindow;
@@ -987,8 +1000,9 @@ namespace pgProvider
 				using (var comm = new NpgsqlCommand("get_user_credentials", conn))
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
-					comm.Parameters.Add("username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
-					using (IDataReader dr = comm.ExecuteReader())
+					comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
+                    comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+                    using (IDataReader dr = comm.ExecuteReader())
 					{
 						var saltColumn = dr.GetOrdinal("salt");
 						var passwordColumn = dr.GetOrdinal("password");

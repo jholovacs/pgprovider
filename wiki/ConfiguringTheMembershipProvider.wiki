@@ -1,0 +1,16 @@
+#summary Configuration options for the pgMembershipProvider
+
+= Introduction =
+
+The pgMembershipProvider class follows the standard Microsoft ASP.NET provider pattern; to see how a MembershipProvider is generally implemented, please see the Microsoft documentation at http://msdn.microsoft.com/en-us/library/yh26yfzy.aspx.
+
+= Configuration Options =
+The following options are attributes that can be applied to the provider in the `web.config` file.  Please note that the attribute names are _case-sensitive_, and will always start with a lowercase letter.
+ 
+ * _connectionStringName_.  (string, default "pgProvider") Sets the provider to reference a named connection string in the `connectionStrings` section.  The connection string must be valid for Npgsql connections.  *If the connection string does not exist or is invalid, the provider will not allow you to continue.*
+ * _passwordStrengthRegularExpression_.  (string, default "") Allows the user to specify a pattern that all passwords must adhere to to be considered valid.  *Note:* reset passwords will ignore the password complexity checks.
+ * _applicationName_.  (string, default "") Sets the name of the application using the provider.
+ * _enablePasswordReset_.  (boolean, default "true") Allows a user's password to be reset.  Attempting to reset a password with this disabled will result in an `InvalidOperationException`.  Default is *true*.
+ * _enablePasswordRetrieval_.  (boolean, default "false") Specifies whether or not the password can be extracted from the database and read.  If this is set to true, the method for storing password data will switch from the default SHA384 hash mechanism to an RSA-encrypted byte array.  For this reason, if _enablePasswordRetrieval_ is set to `true`, the _encryptionKey_ attribute must also be set.
+ * _requiresQuestionAndAnswer_. (boolean, default "false") Specifies that a password recovery cleartext question and a corresponding encrypted answer will be stored to allow a user to reset their own account online.  *Note* The password reset functionality exposed by the provider requires this to be set to true to use password resets.  Trying to do so otherwise will result in an `InvalidOperationException`.
+ * 

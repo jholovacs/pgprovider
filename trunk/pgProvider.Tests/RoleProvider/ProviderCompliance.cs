@@ -168,5 +168,11 @@ namespace pgProvider.Tests.RoleProvider
 			Assert.Throws<ArgumentException>(() => provider.DeleteRole("NonExistentRole", false));
 		}
 
+		[Test]
+		public void FindUsersInRoleThrowsProviderExceptionWhenRoleDoesNotExist()
+		{
+			Assert.Fail();
+		}
+
 	}
 }

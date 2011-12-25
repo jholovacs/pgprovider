@@ -704,6 +704,196 @@ return true;
 end;
 $$ language plpgsql;
 
+create or replace function get_users_in_role(
+	_role_name varchar(250),
+	_application_name varchar(250),
+	_partial_username varchar(250)
+	) returns setof user_record as $$
+begin
+
+if not exists (select null from roles where application_name = _application_name and role_name = _role_name) then
+	raise exception 'The specified role does not exist.' using errcode='ROLNA';
+end if;
+
+return query
+select
+	u.user_id,
+	u.user_name,
+	u.last_activity,
+	u.created,
+	u.email,
+	u.approved,
+	u.last_lockout,
+	u.last_login,
+	u.last_password_changed,
+	u.password_question,
+	u.comment
+from
+	roles as r
+inner join
+	users_roles as ur
+	on ur.role_id = r.role_id
+inner join
+	users as u
+	on u.user_id = ur.user_id
+where
+	r.role_name = _role_name
+	and r.application_name = _application_name
+	and u.user_name ilike '%' || _partial_username || '%'
+	and u.application_name = _application_name
+order by
+	u.user_name;
+end;
+$$ language plpgsql;
+
+create or replace function get_all_roles(
+	_application_name varchar(250)
+	) returns setof roles as $$
+begin
+return query
+select
+	*
+from
+	roles
+where
+	application_name = _application_name
+order by
+	role_name;
+end;
+$$ language plpgsql;
+
+create or replace function get_roles_for_user(
+	_user_name varchar(250),
+	_application_name varchar(250)
+	) returns setof roles as $$
+begin
+return query
+select
+	r.*
+from
+	users as u
+inner join
+	users_roles as ur
+	on ur.user_id = u.user_id
+inner join
+	roles as r
+	on r.role_id = ur.role_id
+where
+	u.user_name = _user_name
+	and u.application_name = _application_name
+	and r.application_name = _application_name;
+end;
+$$ language plpgsql;
+
+create or replace function user_is_in_role(
+	_user_name varchar(250),
+	_role_name varchar(250),
+	_application_name varchar(250)
+	) returns boolean as $$
+declare
+	retval boolean;
+begin
+-- per the roleprovider pattern, throw an exception if the role does not exist
+if not exists(select null from roles where role_name = _role_name and application_name = _application_name) then
+	raise exception 'The specified role does not exist.' using errcode='NOROL';
+end if;
+-- per the roleprovider pattern, throw an exception if the user does not exist
+if not exists(select null from users where user_name = _user_name and application_name = _application_name) then
+	raise exception 'The specified user does not exist.' using errcode='NOUSR';
+end if;
+
+select
+	exists(
+		select null
+		from users as u
+		inner join users_roles as ur
+		on ur.user_id = u.user_id
+		inner join roles as r
+		on r.role_id = ur.role_id
+		where
+			u.user_name = _user_name
+			and u.application_name = _application_name
+			and r.role_name = _role_name
+			and r.application_name = _application_name)
+into retval;
+return retval;
+end;
+$$ language plpgsql;
+
+create or replace function remove_users_from_roles(
+	_users varchar(250)[],
+	_roles varchar(250)[],
+	_application_name varchar(250)
+	) returns boolean as $$
+begin
+create temporary table usernames (username varchar(250) not null primary key);
+create temporary table rolenames (rolename varchar(250) not null primary key);
+-- Create the tables based off the arrays.
+insert into usernames
+	(
+	username
+	)
+select distinct
+	username
+from
+	unnest(_users) as username;
+
+insert into rolenames
+	(
+	rolename
+	)
+select distinct
+	rolename
+from
+	unnest(_roles) as rolename;
+
+-- Per the role provider pattern, an exception is to be thrown if any of the role names or user names specified
+-- do not exist for the given application name.
+if exists (select null from usernames where not exists (select null from users where application_name = _application_name and user_name = username))
+	or exists (select null from roles where not exists (select null from roles where application_name = _application_name and role_name = rolename)) then
+	raise exception 'At least one user name or role specified does not exist in the application scope.' using errcode='MSING';
+end if;
+
+-- Insert the records linking the users to the roles, excluding pre-existing relationships.
+delete from users_roles
+using
+	usernames as un
+inner join
+	users as u on u.application_name = _application_name and u.user_name = un.username
+cross join
+	rolenames as rn
+inner join
+	roles as r on r.application_name = _application_name and r.role_name = rn.rolename
+where 
+	users_roles.user_id = u.user_id
+	and users_roles.role_id = r.role_id;
+return true;
+end;
+$$ language plpgsql;
+
+create or replace function role_exists(
+	_role_name varchar(250),
+	_application_name varchar(250)
+	) returns boolean as $$
+declare
+	retval boolean;
+begin
+
+select exists(
+	select null from roles where application_name = _application_name and role_name = _role_name)
+into retval;
+
+return retval;
+end;
+$$ language plpgsql;
+
+
+
+
+
+
+
+
 /**********************************************************************************************************
 Set object owners
 **********************************************************************************************************/

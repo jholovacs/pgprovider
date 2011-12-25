@@ -676,7 +676,7 @@ namespace pgProvider
 				}
 			}
 		}
-		protected MembershipUserCollection GetUsersFromReader(IDataReader reader)
+		public MembershipUserCollection GetUsersFromReader(IDataReader reader)
 		{
 			if (reader == null) throw new ArgumentNullException("Datareader object cannot be null.");
 			if (reader.IsClosed) throw new InvalidOperationException("This datareader cannot be read from.  It is closed.");

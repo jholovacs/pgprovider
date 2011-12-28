@@ -382,7 +382,7 @@ create or replace function create_user(
 	begin
 		
 	if _email_is_unique
-		and exists(select null from users as u where u.email = _email) then
+		and exists(select null from users as u where u.application_name = _application_name and  u.email = _email) then
 		raise exception 'The email address specified is already in use for this application, and email addresses are configured to be unique.' using errcode='DUPEM';
 	end if;
 

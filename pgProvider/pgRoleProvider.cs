@@ -93,11 +93,14 @@ namespace pgProvider
 			}
 			catch (NpgsqlException ex)
 			{
-				if (ex.Code == "MSING")
+				Log.Error("Failed to add users to role.", ex);
+				switch (ex.Code)
 				{
-					throw new ProviderException("One or more role names and/ or user names specified do not exist in the current application.", ex);
+					case "MSING":
+						throw new ProviderException("One or more role names and/ or user names specified do not exist in the current application.", ex);
+					default:
+						throw ex;
 				}
-				throw ex;
 			}
 		}
 		public override string ApplicationName
@@ -136,12 +139,14 @@ namespace pgProvider
 			}
 			catch (NpgsqlException ex)
 			{
-				if (ex.Code == "DUPRL")
-				{//Role already exists
-					Log.Error("Duplicate Role.", ex);
-					throw new ProviderException("The specified role already exists for this application.", ex);
+				Log.Error("Unable to create the specified role.", ex);
+				switch (ex.Code)
+				{
+					case "DUPRL":
+						throw new ProviderException("The specified role already exists for this application.", ex);
+					default:
+						throw ex;
 				}
-				throw ex;
 			}
 		}
 		public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)

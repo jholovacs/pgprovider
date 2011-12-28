@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using System;
 using System.Configuration.Provider;
+using log4net;
 
 namespace pgProvider.Tests.RoleProvider
 {
@@ -13,6 +14,7 @@ namespace pgProvider.Tests.RoleProvider
 		private NameValueCollection config;
 		private NameValueCollection mconfig;
 		private System.Web.Security.MembershipCreateStatus status;
+		private static readonly ILog Log = LogManager.GetLogger(typeof(ProviderCompliance));
 
 		[TestFixtureSetUp]
 		public void Setup()
@@ -32,7 +34,6 @@ namespace pgProvider.Tests.RoleProvider
 			mconfig.Add("passwordStrengthRegularExpression", "");
 			mconfig.Add("requiresQuestionAndAnswer", "false");
 			mconfig.Add("requiresUniqueEmail", "true");
-			mconfig.Add("applicationName", "NUnit Provider Test");
 			mconfig.Add("encryptionKey", "");
 			mconfig.Add("minSaltCharacters", "30");
 			mconfig.Add("maxSaltCharacters", "60");
@@ -90,15 +91,17 @@ namespace pgProvider.Tests.RoleProvider
 			Initialize();
 			var mprov = new pgMembershipProvider();
 			mprov.Initialize("pgMembershipProvider", mconfig);
+			mprov.DeleteUser("roleTestUser", true);
 			var user = mprov.CreateUser("roleTestUser", "foo12345", "foo@foo", "", "", true, null, out status);
 			Assert.Throws<ProviderException>(() => provider.AddUsersToRoles(new string[] { user.UserName }, new string[] { "NonExistentRole" }));
-			mprov.DeleteUser(user.UserName, true);
+			mprov.DeleteUser("roleTestUser", true);
 		}
 
 		[Test]
 		public void UserAddedToRolesMustExistInTheApplication()
 		{
 			Initialize();
+			if (provider.RoleExists("testRole")) provider.DeleteRole("testRole", false);
 			provider.CreateRole("testRole");
 			Assert.Throws<ProviderException>(() => provider.AddUsersToRoles(new string[] { "NonExistantUser" }, new string[] { "testRole" }));
 			provider.DeleteRole("testRole", false);
@@ -108,6 +111,7 @@ namespace pgProvider.Tests.RoleProvider
 		public void RoleNameCannotAlreadyExistWhenBeingAdded()
 		{
 			Initialize();
+			if (provider.RoleExists("testRole")) provider.DeleteRole("testRole", false);
 			provider.CreateRole("testRole");
 			Assert.Throws<ProviderException>(() => provider.CreateRole("testRole"));
 			provider.DeleteRole("testRole", false);
@@ -119,25 +123,32 @@ namespace pgProvider.Tests.RoleProvider
 			Initialize();
 			var mprov = new pgMembershipProvider();
 			mprov.Initialize("pgMembershipProvider", mconfig);
+			mprov.DeleteUser("roleTestUser", true);
 			var user = mprov.CreateUser("roleTestUser", "foo12345", "foo@foo", "", "", true, null, out status);
+			if (provider.RoleExists("testRole")) provider.DeleteRole("testRole", false);
 			provider.CreateRole("testRole");
 			provider.AddUsersToRoles(new string[] { user.UserName }, new string[] { "testRole" });
 			Assert.Throws<ProviderException>(() => provider.DeleteRole("testRole", true));
-			mprov.DeleteUser(user.UserName, true);
+			mprov.DeleteUser("roleTestUser", true);
 			provider.DeleteRole("testRole", false);
 		}
 
 		[Test]
-		public void WhenThrowNotSetDeletePopulatedRole()
+		public void AllowDeleteOfPopulatedRoleWhenSpecified()
 		{
 			Initialize();
 			var mprov = new pgMembershipProvider();
 			mprov.Initialize("pgMembershipProvider", mconfig);
+			mprov.DeleteUser("roleTestUser", true);
 			var user = mprov.CreateUser("roleTestUser", "foo12345", "foo@foo", "", "", true, null, out status);
+			Assert.IsNotNull(user, "User was not properly created.");
+			if (provider.RoleExists("testRole")) provider.DeleteRole("testRole", false);
 			provider.CreateRole("testRole");
-			provider.AddUsersToRoles(new string[] { user.UserName }, new string[] { "testRole" });
+			Assert.IsTrue(provider.RoleExists("testRole"));
+			Log.Debug(string.Format("Available Roles: {0}", string.Join(", ", provider.GetAllRoles())));
+			provider.AddUsersToRoles(new string[] { "roleTestUser" }, new string[] { "testRole" });
 			Assert.IsTrue(provider.DeleteRole("testRole", false));
-			mprov.DeleteUser(user.UserName, true);
+			mprov.DeleteUser("roleTestUser", true);
 		}
 
 		[Test]
@@ -171,7 +182,8 @@ namespace pgProvider.Tests.RoleProvider
 		[Test]
 		public void FindUsersInRoleThrowsProviderExceptionWhenRoleDoesNotExist()
 		{
-			Assert.Fail();
+			Initialize();
+			Assert.Throws<ProviderException>(() => provider.FindUsersInRole("NonexistantRole", ""));
 		}
 
 	}

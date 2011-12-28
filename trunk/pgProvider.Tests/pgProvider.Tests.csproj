@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="MembershipProvider\AccountCreationAndDeletion.cs" />
     <Compile Include="MembershipProvider\AccountModification.cs" />
+    <Compile Include="MembershipProvider\Compliance.cs" />
     <Compile Include="MembershipProvider\Configuration.cs" />
     <Compile Include="MembershipProvider\PasswordRecovery.cs" />
     <Compile Include="MembershipProvider\SecurityFeatures.cs" />

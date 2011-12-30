@@ -103,6 +103,21 @@ ALTER TABLE ONLY users_roles ADD CONSTRAINT users_roles_pkey PRIMARY KEY (user_i
 ALTER TABLE ONLY users_roles ADD CONSTRAINT users_roles_role_id_fkey FOREIGN KEY (role_id) REFERENCES roles(role_id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY users_roles ADD CONSTRAINT users_roles_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
+CREATE TABLE profiles
+(
+  user_name character varying(250) NOT NULL,
+  application_name character varying(250) NOT NULL,
+  authenticated boolean NOT NULL,
+  last_activity timestamp with time zone NOT NULL DEFAULT now(),
+  setting_values xml NOT NULL,
+  last_updated timestamp with time zone,
+  CONSTRAINT pk_profiles PRIMARY KEY (application_name , user_name )
+);
+CREATE INDEX ix_profiles_application_name_last_activity
+  ON profiles
+  USING btree
+  (application_name, last_activity, authenticated);
+
 /***************************************************************************************************************
 Functions and types
 ***************************************************************************************************************/
@@ -886,6 +901,140 @@ where not exists(
 return true;
 end;
 $$ language plpgsql;
+
+create or replace function delete_inactive_profiles(
+	_application_name varchar(250),
+	_profile_type varchar(20),
+	_cutoff_date timestamp with time zone
+	) returns boolean as $$
+begin
+
+if _profile_type = 'all' then
+	delete from profiles
+	where 
+		application_name = _application_name
+		and last_activity < _cutoff_date;
+	return true;
+end if;
+
+if _profile_type = 'anonymous' then
+	delete from profiles
+	where
+		application_name = _application_name
+		and last_activity < _cutoff_date
+		and authenticated = false;
+	return true;
+end if;
+
+if _profile_type = 'authenticated' then
+	delete from profiles
+	where
+		application_name = _application_name
+		and last_activity < _cutoff_date
+		and authenticated = true;
+	return true;
+end if;
+
+-- if we reach this point of execution, something has not gone well.
+return false;
+end;
+$$ language plpgsql;
+
+create or replace function delete_profiles(
+	_application_name varchar(250),
+	_users varchar(250)[]
+	) returns boolean as $$
+begin
+
+create temporary table usernames (username varchar(250) not null primary key) on commit drop;
+
+-- Create the tables based off the arrays.
+insert into usernames
+	(
+	username
+	)
+select distinct
+	username
+from
+	unnest(_users) as username;
+
+delete from profiles
+using
+	usernames as un
+where
+	profiles.application_name = _application_name
+	and profiles.context = un.username;
+	
+return true;
+end;
+$$ language plpgsql; 
+
+drop type if exists profile_info cascade;
+create type profile_info as(
+	user_name varchar(250),
+	is_anonymous boolean,
+	size int,
+	last_activity_date timestamp with time zone,
+	last_updated_date timestamp with time zone 
+	);
+
+create or replace function get_profile_infos_by_user_name(
+	_user_name varchar(250),
+	_application_name varchar(250),
+	_profile_type varchar(20),
+	_active_profiles boolean,
+	_inactive_profiles boolean,
+	_cutoff_date timestamp with time zone
+	) returns setof profile_info as $$
+begin
+
+if _active_profiles and _inactive_profiles then
+	return query
+	select 
+		user_name,
+		not authenticated,
+		len(setting_values),
+		last_activity,
+		last_updated
+	from
+		profiles
+	where
+		application_name = _application_name
+		and user_name ilike '%' || _user_name || '%'
+		and case _profile_type
+			when 'anonymous' then not authenticated
+			when 'authenticated' then authenticated
+			else true end;
+
+end if;
+
+if _active_profiles <> _inactive_profiles then
+	return query
+	select
+		user_name,
+		not authenticated,
+		len(setting_values),
+		last_activity,
+		last_updated
+	from
+		profiles
+	where
+		application_name = _application_name
+		and (
+			(_active_profiles and last_activity < _cutoff_date)
+			or (_inactive_profiles and last_activity >= _cutoff_date)
+			)
+		and user_name ilike '%' || _user_name || '%'
+		and case _profile_type
+			when 'anonymous' then not authenticated
+			when 'authenticated' then authenticated
+			else true end;
+
+end if;
+return;
+end;
+$$ language plpgsql;
+
 
 
 

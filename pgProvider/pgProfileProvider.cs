@@ -7,6 +7,7 @@ using Npgsql;
 using pgProvider.Exceptions;
 using System.Configuration;
 using log4net;
+using System.Data;
 
 namespace pgProvider
 {
@@ -63,35 +64,42 @@ namespace pgProvider
 
 		public override int DeleteInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate)
 		{
-			var option = string.Empty;
-			switch (authenticationOption)
+			var option = GetAuthValue(authenticationOption);
+
+			using (var conn = new NpgsqlConnection(ConnectionString))
 			{
-				case ProfileAuthenticationOption.Anonymous:
-					option = "anonymous";
-					break;
-				case ProfileAuthenticationOption.Authenticated:
-					option = "authenticated";
-					break;
-				case ProfileAuthenticationOption.All:
-					option = "all";
-					break;
-				default:
-					throw new ArgumentException("authenticationOption");
+				conn.Open();
+				using (var comm = new NpgsqlCommand("delete_inactive_profiles", conn))
+				{
+					comm.CommandType = System.Data.CommandType.StoredProcedure;
+					comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+					comm.Parameters.Add("_profile_type", NpgsqlTypes.NpgsqlDbType.Varchar, 20).Value = option;
+					comm.Parameters.Add("_cutoff_date", NpgsqlTypes.NpgsqlDbType.TimestampTZ).Value = userInactiveSinceDate;
+					var retval = comm.ExecuteNonQuery();
+					return retval;
+				}
 			}
-
-
-			//todo: finish.
-			return 0;
 		}
 
 		public override int DeleteProfiles(string[] usernames)
 		{
-			throw new NotImplementedException();
+			using (var conn = new NpgsqlConnection(ConnectionString))
+			{
+				conn.Open();
+				using (var comm = new NpgsqlCommand("delete_inactive_profiles", conn))
+				{
+					comm.CommandType = System.Data.CommandType.StoredProcedure;
+					comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+					comm.Parameters.Add("_users", NpgsqlTypes.NpgsqlDbType.Varchar | NpgsqlTypes.NpgsqlDbType.Array, 250).Value = usernames;
+					var retval = comm.ExecuteNonQuery();
+					return retval;
+				}
+			}
 		}
 
 		public override int DeleteProfiles(ProfileInfoCollection profiles)
 		{
-			throw new NotImplementedException();
+			return DeleteProfiles(profiles.OfType<ProfileInfo>().Select(p => p.UserName).ToArray());
 		}
 
 		public override ProfileInfoCollection FindInactiveProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
@@ -139,6 +147,81 @@ namespace pgProvider
 		public override void SetPropertyValues(System.Configuration.SettingsContext context, System.Configuration.SettingsPropertyValueCollection collection)
 		{
 			throw new NotImplementedException();
+		}
+
+		protected string GetAuthValue(ProfileAuthenticationOption authenticationOption)
+		{
+			var option = string.Empty;
+			switch (authenticationOption)
+			{
+				case ProfileAuthenticationOption.Anonymous:
+					option = "anonymous";
+					break;
+				case ProfileAuthenticationOption.Authenticated:
+					option = "authenticated";
+					break;
+				case ProfileAuthenticationOption.All:
+					option = "all";
+					break;
+				default:
+					throw new ArgumentException("authenticationOption");
+			}
+			return option;
+		}
+
+		protected ProfileInfoCollection GetProfileInfoCollectionFromUserName(string username,
+			ProfileAuthenticationOption authenticationOption, bool getActive, bool getInactive, DateTime? cutoffTimeStamp)
+		{
+			using (var conn = new NpgsqlConnection(ConnectionString))
+			{
+				conn.Open();
+				using (var comm = new NpgsqlCommand("delete_inactive_profiles", conn))
+				{
+					comm.CommandType = System.Data.CommandType.StoredProcedure;
+					comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = username;
+					comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
+					comm.Parameters.Add("_profile_type", NpgsqlTypes.NpgsqlDbType.Varchar, 20).Value = GetAuthValue(authenticationOption);
+					comm.Parameters.Add("_active_profiles", NpgsqlTypes.NpgsqlDbType.Boolean).Value = getActive;
+					comm.Parameters.Add("_inactive_profiles", NpgsqlTypes.NpgsqlDbType.Boolean).Value = getInactive;
+					if (cutoffTimeStamp != null)
+					{
+						comm.Parameters.Add("_cutoff_date", NpgsqlTypes.NpgsqlDbType.TimestampTZ).Value = cutoffTimeStamp;
+					}
+					else
+					{
+						comm.Parameters.Add("_cutoff_date", NpgsqlTypes.NpgsqlDbType.TimestampTZ).Value = DateTime.MinValue;
+					}
+
+					using (var dr = comm.ExecuteReader())
+					{
+						return DataReaderToProfileInfoCollection(dr);
+					}
+				}
+			}
+		}
+
+		protected ProfileInfoCollection DataReaderToProfileInfoCollection(IDataReader dr)
+		{
+			var retval = new ProfileInfoCollection();
+			if (dr == null) throw new ArgumentNullException();
+			var usernameColumn = dr.GetOrdinal("user_name");
+			var isAnonymousColumn = dr.GetOrdinal("is_anonymous");
+			var sizeColumn = dr.GetOrdinal("size");
+			var lastActivityColumn = dr.GetOrdinal("last_activity_date");
+			var lastUpdatedColumn = dr.GetOrdinal("last_updated_date");
+
+			while (dr.Read())
+			{
+				var p = new ProfileInfo(
+					dr.GetString(usernameColumn),
+					dr.GetBoolean(isAnonymousColumn),
+					dr.IsDBNull(lastActivityColumn) ? DateTime.MinValue : dr.GetDateTime(lastActivityColumn),
+					dr.IsDBNull(lastUpdatedColumn) ? DateTime.MinValue : dr.GetDateTime(lastUpdatedColumn),
+					dr.GetInt32(sizeColumn));
+				retval.Add(p);
+			}
+
+			return retval;
 		}
 	}
 }

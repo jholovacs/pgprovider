@@ -22,7 +22,7 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 -- Create the users table
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users (
     user_id integer NOT NULL,
     user_name character varying(250) NOT NULL,
@@ -55,7 +55,7 @@ CREATE INDEX ix_users_last_activity ON users USING btree (application_name, last
 CREATE UNIQUE INDEX ux_users_user_name_application_name ON users USING btree (application_name, user_name);
 
 -- Create the roles table
-DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS roles CASCADE;
 CREATE TABLE roles (
     role_id integer NOT NULL,
     role_name character varying(250) NOT NULL,
@@ -74,7 +74,7 @@ ALTER TABLE ONLY roles ADD CONSTRAINT roles_pkey PRIMARY KEY (role_id);
 CREATE UNIQUE INDEX ux_roles_role_name_application_name ON roles USING btree (role_name, application_name);
 
 -- Create the user_login_activity table
-DROP TABLE IF EXISTS user_login_activity;
+DROP TABLE IF EXISTS user_login_activity CASCADE;
 CREATE TABLE user_login_activity (
     activity_id integer NOT NULL,
     "when" timestamp with time zone DEFAULT now() NOT NULL,
@@ -94,7 +94,7 @@ ALTER TABLE ONLY user_login_activity ADD CONSTRAINT pk_user_login_activity PRIMA
 CREATE INDEX ix_user_login_activity_user_id ON user_login_activity USING btree (user_id, "when");
 
 -- Create the users_roles table
-DROP TABLE IF EXISTS users_roles;
+DROP TABLE IF EXISTS users_roles CASCADE;
 CREATE TABLE users_roles (
     user_id integer NOT NULL,
     role_id integer NOT NULL
@@ -103,6 +103,7 @@ ALTER TABLE ONLY users_roles ADD CONSTRAINT users_roles_pkey PRIMARY KEY (user_i
 ALTER TABLE ONLY users_roles ADD CONSTRAINT users_roles_role_id_fkey FOREIGN KEY (role_id) REFERENCES roles(role_id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY users_roles ADD CONSTRAINT users_roles_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
+DROP TABLE IF EXISTS profiles CASCADE;
 CREATE TABLE profiles
 (
   user_name character varying(250) NOT NULL,
@@ -117,6 +118,18 @@ CREATE INDEX ix_profiles_application_name_last_activity
   ON profiles
   USING btree
   (application_name, last_activity, authenticated);
+
+CREATE TABLE profiles
+(
+  user_id integer NOT NULL,
+  property_name character varying(250) NOT NULL,
+  property_type character varying(250) NOT NULL,
+  property_value text,
+  CONSTRAINT profiles_pkey PRIMARY KEY (user_id , property_name ),
+  CONSTRAINT fk_profiles_users FOREIGN KEY (user_id)
+      REFERENCES users (user_id) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE CASCADE
+);
 
 /***************************************************************************************************************
 Functions and types
@@ -902,144 +915,95 @@ return true;
 end;
 $$ language plpgsql;
 
-create or replace function delete_inactive_profiles(
-	_application_name varchar(250),
-	_profile_type varchar(20),
-	_cutoff_date timestamp with time zone
-	) returns boolean as $$
-begin
-
-if _profile_type = 'all' then
-	delete from profiles
-	where 
-		application_name = _application_name
-		and last_activity < _cutoff_date;
-	return true;
-end if;
-
-if _profile_type = 'anonymous' then
-	delete from profiles
-	where
-		application_name = _application_name
-		and last_activity < _cutoff_date
-		and authenticated = false;
-	return true;
-end if;
-
-if _profile_type = 'authenticated' then
-	delete from profiles
-	where
-		application_name = _application_name
-		and last_activity < _cutoff_date
-		and authenticated = true;
-	return true;
-end if;
-
--- if we reach this point of execution, something has not gone well.
-return false;
-end;
-$$ language plpgsql;
-
-create or replace function delete_profiles(
-	_application_name varchar(250),
-	_users varchar(250)[]
-	) returns boolean as $$
-begin
-
-create temporary table usernames (username varchar(250) not null primary key) on commit drop;
-
--- Create the tables based off the arrays.
-insert into usernames
-	(
-	username
-	)
-select distinct
-	username
-from
-	unnest(_users) as username;
-
-delete from profiles
-using
-	usernames as un
-where
-	profiles.application_name = _application_name
-	and profiles.context = un.username;
-	
-return true;
-end;
-$$ language plpgsql; 
-
 drop type if exists profile_info cascade;
 create type profile_info as(
-	user_name varchar(250),
-	is_anonymous boolean,
-	size int,
-	last_activity_date timestamp with time zone,
-	last_updated_date timestamp with time zone 
+	property_name varchar(250),
+	property_type varchar(250),
+	property_value text
 	);
 
-create or replace function get_profile_infos_by_user_name(
+create or replace function get_profile_data(
 	_user_name varchar(250),
-	_application_name varchar(250),
-	_profile_type varchar(20),
-	_active_profiles boolean,
-	_inactive_profiles boolean,
-	_cutoff_date timestamp with time zone
+	_application_name varchar(250)
 	) returns setof profile_info as $$
 begin
 
-if _active_profiles and _inactive_profiles then
-	return query
-	select 
-		user_name,
-		not authenticated,
-		len(setting_values),
-		last_activity,
-		last_updated
-	from
-		profiles
-	where
-		application_name = _application_name
-		and user_name ilike '%' || _user_name || '%'
-		and case _profile_type
-			when 'anonymous' then not authenticated
-			when 'authenticated' then authenticated
-			else true end;
+return query
+select
+	p.property_name,
+	p.property_type,
+	p.property_value
+from
+	users as u
+inner join
+	profiles as p
+	on p.user_id = u.user_id
+where
+	u.application_name = _application_name
+	and u.user_name = _user_name;
 
-end if;
-
-if _active_profiles <> _inactive_profiles then
-	return query
-	select
-		user_name,
-		not authenticated,
-		len(setting_values),
-		last_activity,
-		last_updated
-	from
-		profiles
-	where
-		application_name = _application_name
-		and (
-			(_active_profiles and last_activity < _cutoff_date)
-			or (_inactive_profiles and last_activity >= _cutoff_date)
-			)
-		and user_name ilike '%' || _user_name || '%'
-		and case _profile_type
-			when 'anonymous' then not authenticated
-			when 'authenticated' then authenticated
-			else true end;
-
-end if;
 return;
 end;
 $$ language plpgsql;
 
+create or replace function set_profile_property(
+	_user_name varchar(250),
+	_application_name varchar(250),
+	_property_name varchar(250),
+	_property_type varchar(250),
+	_property_value text
+	) returns boolean as $$
+begin
 
+if exists(
+	select 
+		null 
+	from users as u
+	inner join profiles as p
+		on p.user_id = u.user_id
+	where
+		u.application_name = _application_name
+		and u.user_name = _user_name
+		and p.property_name = _property_name
+	) then
+	
+	-- the setting exists, this is an update operation
+	update profiles as p
+	set
+		p.property_type = _property_type,
+		p.property_value = _property_value
+	from
+		users as u
+	where
+		u.application_name = _application_name
+		and u.user_name = _user_name
+		and p.user_id = u.user_id
+		and p.property_name = _property_name;
+	return true;
+end if;
 
+-- This is an insert operation
+insert into profiles
+	(
+	user_id,
+	property_name,
+	property_type,
+	property_value
+	)
+select distinct
+	u.user_id,
+	_property_name,
+	_property_type,
+	_property_value
+from
+	users as u
+where
+	u.application_name = _application_name
+	and u.user_name = _user_name;
 
-
-
+return true;
+end;
+$$ language plpgsql;
 
 /**********************************************************************************************************
 Set object owners

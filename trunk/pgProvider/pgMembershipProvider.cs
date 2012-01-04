@@ -1029,6 +1029,9 @@ namespace pgProvider
 		protected MembershipUserCollection PaginateUserCollection(MembershipUserCollection source, int pageIndex, int pageSize, out int totalRecords)
 		{
 			totalRecords = source.Count;
+			if (pageSize < 0) throw new ArgumentException("The page size cannot be less than zero.");
+			if (pageSize == 0) return source;
+
 			if (totalRecords > pageSize)
 			{
 				var firstRecord = pageIndex * pageSize;

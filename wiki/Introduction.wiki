@@ -8,8 +8,8 @@ So now, I won't have to worry about it; and hopefully, other people will not hav
 
 = Status =
  * The MembershipProvider is complete, and unit tests are available to be run.
- * The RoleProvider is incomplete, and unit tests have not been written yet.
- * The ProfileProvider has not been started, and unit tests have not been written yet.
+ * The RoleProvider is complete, and unit tests are available to be run.
+ * The ProfileProvider in its original intended form has been abandoned; I plan on making a custom implementation at some point.
 
 = Details =
 

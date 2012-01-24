@@ -106,24 +106,8 @@ ALTER TABLE ONLY users_roles ADD CONSTRAINT users_roles_user_id_fkey FOREIGN KEY
 DROP TABLE IF EXISTS profiles CASCADE;
 CREATE TABLE profiles
 (
-  user_name character varying(250) NOT NULL,
-  application_name character varying(250) NOT NULL,
-  authenticated boolean NOT NULL,
-  last_activity timestamp with time zone NOT NULL DEFAULT now(),
-  setting_values xml NOT NULL,
-  last_updated timestamp with time zone,
-  CONSTRAINT pk_profiles PRIMARY KEY (application_name , user_name )
-);
-CREATE INDEX ix_profiles_application_name_last_activity
-  ON profiles
-  USING btree
-  (application_name, last_activity, authenticated);
-
-CREATE TABLE profiles
-(
   user_id integer NOT NULL,
   property_name character varying(250) NOT NULL,
-  property_type character varying(250) NOT NULL,
   property_value text,
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id , property_name ),
   CONSTRAINT fk_profiles_users FOREIGN KEY (user_id)
@@ -1004,6 +988,26 @@ where
 return true;
 end;
 $$ language plpgsql;
+
+drop type if exists key_value_pair
+create type key_value_pair as (
+	k varchar(250),
+	v text
+	);
+
+create or replace function persist_profile(
+	_user_id integer,
+	_key_value_pairs key_value_pair[]
+	) returns boolean as $$
+begin;
+
+...
+
+return true;
+end;
+
+
+
 
 /**********************************************************************************************************
 Set object owners

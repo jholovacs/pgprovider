@@ -14,30 +14,14 @@ namespace pgProvider
 			(ProfileConfigurationSection)System.Configuration.ConfigurationManager.GetSection("profileConfiguration");
 		protected static readonly string ConnectionString = ConfigurationManager.ConnectionStrings[Configuration.ConnectionStringName].ConnectionString;
 		protected static readonly ILog Log = LogManager.GetLogger(typeof(ProfileHelper));
-		protected static readonly pgSettingsProvider settingsProvider = new pgSettingsProvider();
 
-		//public static object this[string propertyName]
-		//{
-		//    get
-		//    {
-		//        var profile = GetProfile();
-		//        if (profile.ContainsKey(propertyName)) return profile[propertyName];
-		//        return null;
-		//    }
-		//    set
-		//    {
-		//        var profile = GetProfile();
-		//        profile[propertyName].PropertyValue = value;
-		//        PersistProfile(profile);
-		//    }
-		//}
 
 		protected static System.Web.HttpContext GetCurrentContext()
 		{
 			return System.Web.HttpContext.Current;
 		}
 
-		protected static IDictionary<string, SettingsPropertyValue> GetProfile()
+		protected static IDictionary<string, string> GetProfile()
 		{
 			var context = GetCurrentContext();
 			if (context == null) return null;
@@ -45,16 +29,16 @@ namespace pgProvider
 			{
 				context.Session["profileInfo"] = CollectPersistedProfile(context);
 			}
-			var profile = ((IDictionary<string, SettingsPropertyValue>)context.Session["profileInfo"]);
+			var profile = ((IDictionary<string, string>)context.Session["profileInfo"]);
 			return profile;
 		}
 
-		protected static IDictionary<string, SettingsPropertyValue> CollectPersistedProfile(HttpContext context)
+		protected static IDictionary<string, string> CollectPersistedProfile(HttpContext context)
 		{
 			if (!context.User.Identity.IsAuthenticated)
 			{
 				Log.Debug("The user is not authenticated; no profile is persisted.");
-				return new Dictionary<string, SettingsPropertyValue>();
+				return new Dictionary<string, string>();
 			}
 
 			using (var conn = new NpgsqlConnection(ConnectionString))
@@ -74,25 +58,28 @@ namespace pgProvider
 
 		}
 
-		protected static IDictionary<string, SettingsPropertyValue> GetProfileFromReader(IDataReader dr)
+		protected static IDictionary<string, string> GetProfileFromReader(IDataReader dr)
 		{
 			if (dr == null) throw new ArgumentNullException();
 			var propertyNameColumn = dr.GetOrdinal("property_name");
-			var propertyTypeColumn = dr.GetOrdinal("property_type");
 			var propertyValueColumn = dr.GetOrdinal("property_value");
 
-			var r = new Dictionary<string, SettingsPropertyValue>();
+			var r = new Dictionary<string, string>();
 			while (dr.Read())
 			{
-				//var spv = new SettingsPropertyValue(
-				//    new SettingsProperty(dr.GetString(propertyNameColumn), Type.GetType(dr.GetString(propertyTypeColumn)), 
+				if (dr.IsDBNull(propertyValueColumn))
+				{
+					r.Add(dr.GetString(propertyNameColumn), null);
+				}
+				else
+				{
+					r.Add(dr.GetString(propertyNameColumn), dr.GetString(propertyValueColumn));
+				}
 			}
-
-			//todo: finish this.
-			return null;
+			return r;
 		}
 
-		protected static void PersistProfile(IDictionary<string, SettingsPropertyValue> profile)
+		protected static void PersistProfile(IDictionary<string, string> profile)
 		{
 
 		}

@@ -4,7 +4,6 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Web.Security;
-using log4net;
 using Npgsql;
 using pgProvider.Exceptions;
 
@@ -13,7 +12,7 @@ namespace pgProvider
 	public class pgMembershipProvider : MembershipProvider
 	{
 		#region protected variables
-		protected static readonly ILog Log = LogManager.GetLogger(typeof(pgMembershipProvider));
+		protected static readonly log4net.ILog Log = log4net.LogManager.GetLogger(typeof(pgMembershipProvider));
 		protected string _Name = string.Empty;
 		protected string _ConnectionStringName = "pgProvider";
 		protected bool _EnablePasswordReset = true;
@@ -37,7 +36,7 @@ namespace pgProvider
 
 		public override void Initialize(string name, NameValueCollection config)
 		{
-			_Name = name;
+			_Name = name ?? config["name"];
 
 			try
 			{

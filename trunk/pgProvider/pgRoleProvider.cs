@@ -22,7 +22,11 @@ namespace pgProvider
 		{
 			try
 			{
+
+
 				Log.Debug("pgRoleProvider Initialize() invoked.");
+
+				_Name = name ?? config["name"];
 
 				_ConnectionStringName = config["connectionStringName"] ?? _ConnectionStringName;
 				Log.Debug(string.Format("_ConnectionStringName: {0}", _ConnectionStringName));

@@ -989,7 +989,7 @@ return true;
 end;
 $$ language plpgsql;
 
-drop type if exists key_value_pair
+drop type if exists key_value_pair;
 create type key_value_pair as (
 	k varchar(250),
 	v text

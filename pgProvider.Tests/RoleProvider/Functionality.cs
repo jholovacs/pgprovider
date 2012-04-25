@@ -10,7 +10,7 @@ namespace pgProvider.Tests.RoleProvider
         private pgRoleProvider provider;
         private NameValueCollection config;
 
-        [TestFixtureSetUp]
+        [SetUp]
         public void Setup()
         {
             provider = new pgRoleProvider();
@@ -25,7 +25,17 @@ namespace pgProvider.Tests.RoleProvider
 
         #endregion
 
-    }
+		#region Tests
+		[Test]
+		public void ThisIsTheTestThatTestsNothing()
+		{
+			//because I didn't want to delete the test file until I remembered what I made it for.
+			Assert.IsTrue(true);
+		}
+
+		#endregion
+
+	}
 
 
 }

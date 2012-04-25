@@ -13,7 +13,7 @@ namespace pgProvider.Tests.MembershipProvider
 		private NameValueCollection mconfig;
 		private MembershipCreateStatus status;
 
-		[TestFixtureSetUp]
+		[SetUp]
 		protected void TestSetup()
 		{
 			provider = new pgMembershipProvider();

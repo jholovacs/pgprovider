@@ -995,20 +995,6 @@ create type key_value_pair as (
 	v text
 	);
 
-create or replace function persist_profile(
-	_user_id integer,
-	_key_value_pairs key_value_pair[]
-	) returns boolean as $$
-begin;
-
-...
-
-return true;
-end;
-
-
-
-
 /**********************************************************************************************************
 Set object owners
 **********************************************************************************************************/

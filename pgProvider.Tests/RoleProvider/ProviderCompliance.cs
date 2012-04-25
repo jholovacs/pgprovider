@@ -16,7 +16,7 @@ namespace pgProvider.Tests.RoleProvider
 		private System.Web.Security.MembershipCreateStatus status;
 		private static readonly ILog Log = LogManager.GetLogger(typeof(ProviderCompliance));
 
-		[TestFixtureSetUp]
+		[SetUp]
 		public void Setup()
 		{
 			provider = new pgRoleProvider();

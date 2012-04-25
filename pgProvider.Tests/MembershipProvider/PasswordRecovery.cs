@@ -17,7 +17,7 @@ namespace pgProvider.Tests.MembershipProvider
 		private string defaultPassword;
 		private static string encryptionKey = EncryptionHelper.GenerateAESKey().ToBase64();
 
-		[TestFixtureSetUp]
+		[SetUp]
 		protected void TestSetup()
 		{
 			provider = new pgMembershipProvider();
@@ -58,10 +58,13 @@ namespace pgProvider.Tests.MembershipProvider
 				out status);
 		}
 
-		[TestFixtureTearDown]
+		[TearDown]
 		protected void TestTeardown()
 		{
-			provider.DeleteUser(user.UserName, true);
+			if (user != null)
+			{
+				provider.DeleteUser(user.UserName, true);
+			}
 		}
 
 		#endregion

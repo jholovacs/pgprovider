@@ -68,10 +68,7 @@
     <Compile Include="Exceptions\ProviderConfigurationException.cs" />
     <Compile Include="Helpers\EncryptionHelper.cs" />
     <Compile Include="pgMembershipProvider.cs" />
-    <Compile Include="pgProfileProvider.cs" />
     <Compile Include="pgRoleProvider.cs" />
-    <Compile Include="ProfileConfigurationSection.cs" />
-    <Compile Include="Helpers\ProfileHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

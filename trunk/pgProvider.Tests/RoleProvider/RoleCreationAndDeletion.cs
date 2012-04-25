@@ -14,7 +14,7 @@ namespace pgProvider.Tests.RoleProvider
         private pgRoleProvider provider;
         private NameValueCollection config;
 
-        [TestFixtureSetUp]
+        [SetUp]
         public void Setup()
         {
             provider = new pgRoleProvider();

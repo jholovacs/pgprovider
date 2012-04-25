@@ -18,7 +18,7 @@ namespace pgProvider.Tests.MembershipProvider
         private string defaultPassword;
         private static readonly ILog Log = LogManager.GetLogger(typeof(SecurityFeatures));
 
-        [TestFixtureSetUp]
+        [SetUp]
         protected void TestSetup()
         {
             provider = new pgMembershipProvider();
@@ -57,10 +57,10 @@ namespace pgProvider.Tests.MembershipProvider
                 out status);
         }
 
-        [TestFixtureTearDown]
+        [TearDown]
         protected void TestTeardown()
         {
-            provider.DeleteUser("testUser", true);
+				provider.DeleteUser("testUser", true);
         }
 
         #endregion

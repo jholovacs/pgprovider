@@ -25,11 +25,11 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{28535132-CE32-442D-B037-E42331164034}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{28535132-CE32-442D-B037-E42331164034}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{28535132-CE32-442D-B037-E42331164034}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{28535132-CE32-442D-B037-E42331164034}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{28535132-CE32-442D-B037-E42331164034}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{28535132-CE32-442D-B037-E42331164034}.Debug|Any CPU.ActiveCfg = DEV|Any CPU
+		{28535132-CE32-442D-B037-E42331164034}.Debug|Any CPU.Build.0 = DEV|Any CPU
+		{28535132-CE32-442D-B037-E42331164034}.Debug|Mixed Platforms.ActiveCfg = DEV|Any CPU
+		{28535132-CE32-442D-B037-E42331164034}.Debug|Mixed Platforms.Build.0 = DEV|Any CPU
+		{28535132-CE32-442D-B037-E42331164034}.Debug|x86.ActiveCfg = DEV|Any CPU
 		{28535132-CE32-442D-B037-E42331164034}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28535132-CE32-442D-B037-E42331164034}.Release|Any CPU.Build.0 = Release|Any CPU
 		{28535132-CE32-442D-B037-E42331164034}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU

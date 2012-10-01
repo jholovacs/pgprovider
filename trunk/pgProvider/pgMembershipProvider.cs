@@ -37,6 +37,7 @@ namespace pgProvider
 		public override void Initialize(string name, NameValueCollection config)
 		{
 			_Name = name ?? config["name"];
+			Log.DebugFormat("'{0}' Initializing...", _Name);
 
 			try
 			{
@@ -44,37 +45,37 @@ namespace pgProvider
 
 				#region Set the configuration values
 				_ConnectionStringName = config["connectionStringName"] ?? _ConnectionStringName;
-				Log.Debug(string.Format("_ConnectionStringName: {0}", _ConnectionStringName));
+				Log.DebugFormat("_ConnectionStringName: {0}", _ConnectionStringName);
 
 				_PasswordStrengthRegularExpression = config["passwordStrengthRegularExpression"] ?? _PasswordStrengthRegularExpression;
-				Log.Debug(string.Format("_PasswordStrengthRegularExpression: {0}", _PasswordStrengthRegularExpression));
+				Log.DebugFormat("_PasswordStrengthRegularExpression: {0}", _PasswordStrengthRegularExpression);
 
 				_ApplicationName = config["applicationName"] ?? _ApplicationName;
-				Log.Debug(string.Format("_ApplicationName: {0}", _ApplicationName));
+				Log.DebugFormat("_ApplicationName: {0}", _ApplicationName);
 
 				if (config["enablePasswordReset"] != null)
 				{
 					_EnablePasswordReset = Convert.ToBoolean(config["enablePasswordReset"]);
 				}
-				Log.Debug(string.Format("_EnablePasswordReset: {0}", _EnablePasswordReset));
+				Log.DebugFormat("_EnablePasswordReset: {0}", _EnablePasswordReset);
 
 				if (config["enablePasswordRetrieval"] != null)
 				{
 					_EnablePasswordRetrieval = Convert.ToBoolean(config["enablePasswordRetrieval"]);
 				}
-				Log.Debug(string.Format("_EnablePasswordRetrieval: {0}", _EnablePasswordRetrieval));
+				Log.DebugFormat("_EnablePasswordRetrieval: {0}", _EnablePasswordRetrieval);
 
 				if (config["requiresQuestionAndAnswer"] != null)
 				{
 					_RequiresQuestionAndAnswer = Convert.ToBoolean(config["requiresQuestionAndAnswer"]);
 				}
-				Log.Debug(string.Format("_RequiresQuestionAndAnswer: {0}", _RequiresQuestionAndAnswer));
+				Log.DebugFormat("_RequiresQuestionAndAnswer: {0}", _RequiresQuestionAndAnswer);
 
 				if (config["requiresUniqueEmail"] != null)
 				{
 					_RequiresUniqueEmail = Convert.ToBoolean(config["requiresUniqueEmail"]);
 				}
-				Log.Debug(string.Format("_RequiresUniqueEmail: {0}", _RequiresUniqueEmail));
+				Log.DebugFormat("_RequiresUniqueEmail: {0}", _RequiresUniqueEmail);
 
 				if (config["maxInvalidPasswordAttempts"] != null)
 				{
@@ -84,7 +85,7 @@ namespace pgProvider
 						throw new ProviderConfigurationException("MaxInvalidPasswordAttempts must be 0 or greater.");
 					}
 				}
-				Log.Debug(string.Format("_MaxInvalidPasswordAttempts: {0}", _MaxInvalidPasswordAttempts));
+				Log.DebugFormat("_MaxInvalidPasswordAttempts: {0}", _MaxInvalidPasswordAttempts);
 
 				if (config["minRequiredNonAlphanumericCharacters"] != null)
 				{
@@ -94,7 +95,7 @@ namespace pgProvider
 						throw new ProviderConfigurationException("MinRequiredNonAlphanumericCharacters must be 0 or greater.");
 					}
 				}
-				Log.Debug(string.Format("_MinRequiredNonAlphanumericCharacters: {0}", _MinRequiredNonAlphanumericCharacters));
+				Log.DebugFormat("_MinRequiredNonAlphanumericCharacters: {0}", _MinRequiredNonAlphanumericCharacters);
 
 				if (config["passwordAttemptWindow"] != null)
 				{
@@ -104,13 +105,13 @@ namespace pgProvider
 						throw new ProviderConfigurationException("Password Attempt window must be 0 or greater.");
 					}
 				}
-				Log.Debug(string.Format("_PasswordAttemptWindow: {0}", _PasswordAttemptWindow));
+				Log.DebugFormat("_PasswordAttemptWindow: {0}", _PasswordAttemptWindow);
 
 				if (config["encryptionKey"] != null)
 				{
 					_EncryptionKey = Convert.FromBase64String(config["encryptionKey"]);
 				}
-				Log.Debug(string.Format("_EncryptionKey: {0}", _EncryptionKey));
+				Log.DebugFormat("_EncryptionKey: {0}", _EncryptionKey);
 
 				if (config["minSaltCharacters"] != null)
 				{
@@ -120,7 +121,7 @@ namespace pgProvider
 						throw new ProviderConfigurationException("MinSaltCharacters must be between 0 and 250.");
 					}
 				}
-				Log.Debug(string.Format("_MinSaltCharacters: {0}", _MinSaltCharacters));
+				Log.DebugFormat("_MinSaltCharacters: {0}", _MinSaltCharacters);
 
 				if (config["maxSaltCharacters"] != null)
 				{
@@ -130,7 +131,7 @@ namespace pgProvider
 						throw new ProviderConfigurationException("MaxSaltCharacters must be between 1 and 250.");
 					}
 				}
-				Log.Debug(string.Format("_MaxSaltCharacters: {0}", _MaxSaltCharacters));
+				Log.DebugFormat("_MaxSaltCharacters: {0}", _MaxSaltCharacters);
 
 				if (config["minRequiredPasswordLength"] != null)
 				{
@@ -140,7 +141,7 @@ namespace pgProvider
 						throw new ProviderConfigurationException("Minimum password characters must be between 0 and 100.");
 					}
 				}
-				Log.Debug(string.Format("_MinRequiredPasswordLength: {0}", _MinRequiredPasswordLength));
+				Log.DebugFormat("_MinRequiredPasswordLength: {0}", _MinRequiredPasswordLength);
 
 				if (config["lockoutTime"] != null)
 				{
@@ -150,7 +151,7 @@ namespace pgProvider
 						throw new ProviderConfigurationException("Minimum lockout time is 0 minutes.");
 					}
 				}
-				Log.Debug(string.Format("_LockoutTime: {0}", _LockoutTime));
+				Log.DebugFormat("_LockoutTime: {0}", _LockoutTime);
 
 				if (config["sessionTime"] != null)
 				{
@@ -160,7 +161,7 @@ namespace pgProvider
 						throw new ProviderConfigurationException("Minimum session time is 1 minute.");
 					}
 				}
-				Log.Debug(string.Format("_SessionTime: {0}", _SessionTime));
+				Log.DebugFormat("_SessionTime: {0}", _SessionTime);
 
 				#endregion
 
@@ -176,7 +177,7 @@ namespace pgProvider
 				}
 
 				ConnectionString = ConfigurationManager.ConnectionStrings[_ConnectionStringName].ConnectionString;
-				Log.Debug(string.Format("ConnectionString: {0}", ConnectionString));
+				Log.DebugFormat("ConnectionString: {0}", ConnectionString);
 
 				Log.Debug("Checking to make sure the specified connection string can connect...");
 				using (var conn = new NpgsqlConnection(ConnectionString))
@@ -237,12 +238,14 @@ namespace pgProvider
 		}
 		public override bool ChangePassword(string username, string oldPassword, string newPassword)
 		{
+			Log.DebugFormat("ChangePassword(string, string, string) called for '{0}'", username);
 			if (ValidateUser(username, oldPassword))
 			{
 				try
 				{
 					ValidatePasswordComplexity(newPassword);
 					ChangePassword(username, newPassword);
+					Log.InfoFormat("Password changed for '{0}'", username);
 					return true;
 				}
 				catch (Exception ex)
@@ -256,16 +259,19 @@ namespace pgProvider
 		public void ChangePassword(string username, string newPassword)
 		{
 
+			Log.DebugFormat("ChangePassword(string, string) called for '{0}'", username);
 			string salt = string.Empty;
 			byte[] hash;
 
 			switch (EncryptionMethod)
 			{
 				case EncryptionMethods.Hash:
+					Log.DebugFormat("Hashing new password...");
 					salt = EncryptionHelper.GenerateSalt(_MinSaltCharacters, _MaxSaltCharacters);
 					hash = EncryptionHelper.GenerateHash(newPassword, salt);
 					break;
 				case EncryptionMethods.ReversibleSymmetric:
+					Log.DebugFormat("Encrypting new password...");
 					hash = EncryptionHelper.EncryptString(newPassword, _EncryptionKey);
 					break;
 				default:
@@ -274,6 +280,7 @@ namespace pgProvider
 
 			using (var conn = new NpgsqlConnection(ConnectionString))
 			{
+				Log.DebugFormat("Updating the password/ salt data for '{0}' in the database...", username);
 				conn.Open();
 				using (var comm = new NpgsqlCommand("update_user_password", conn))
 				{
@@ -286,8 +293,10 @@ namespace pgProvider
 				}
 			}
 
+			Log.DebugFormat("Unlocking the account for '{0}' if it was locked...", username);
 			UnlockUser(username);
 
+			Log.DebugFormat("ChangePassword(string, string) for '{0}' complete.", username);
 		}
 		protected virtual void ValidatePasswordComplexity(string newPassword)
 		{
@@ -307,19 +316,20 @@ namespace pgProvider
 		}
 		public override bool ChangePasswordQuestionAndAnswer(string username, string password, string newPasswordQuestion, string newPasswordAnswer)
 		{
+			Log.DebugFormat("ChangePasswordQuestionAndAnswer(string, string, string, string) for '{0}' beginning...", username);
 			if (ValidateUser(username, password))
 			{
 				try
 				{
 					UpdateQAndA(username, newPasswordQuestion, newPasswordAnswer);
-					Log.Info(string.Format("Password Question and answer have been updated for '{0}'", username));
+					Log.InfoFormat("Password Question and answer have been updated for '{0}'", username);
 					return true;
 				}
 				catch (Exception ex)
 				{
 					Log.Error("Error attempting to change the user's question and answer.", ex);
 				}
-
+				Log.InfoFormat("Password validation failed for user '{0}'", username);
 			}
 			return false;
 		}
@@ -328,7 +338,7 @@ namespace pgProvider
 		{
 			try
 			{
-				Log.Debug(string.Format("Creating user record for '{0}'...", username));
+				Log.DebugFormat("Creating user record for '{0}'...", username);
 				var userId = CreateUser(username, email, isApproved);
 			}
 			catch (NpgsqlException ex)
@@ -408,11 +418,13 @@ namespace pgProvider
 			}
 
 			status = MembershipCreateStatus.Success;
-			Log.Info(string.Format("Created user '{0}'.", username));
+			Log.InfoFormat("Created user '{0}'.", username);
 			return GetUser(username, false);
 		}
+
 		protected void UpdateQAndA(string username, string question, string answer)
 		{
+			Log.DebugFormat("UpdateQAndA(string, string, string) for user '{0}' beginning...", username);
 			var modifiedAnswer = string.Empty;
 			try
 			{
@@ -435,6 +447,7 @@ namespace pgProvider
 			var salt = EncryptionHelper.GenerateSalt(_MinSaltCharacters, _MaxSaltCharacters);
 			var hash = EncryptionHelper.GenerateHash(modifiedAnswer, salt);
 
+			Log.DebugFormat("Updating the Q&A for '{0}' in the database...", username);
 			using (var conn = new NpgsqlConnection(ConnectionString))
 			{
 				conn.Open();
@@ -459,6 +472,8 @@ namespace pgProvider
 		}
 		protected int CreateUser(string username, string email, bool isApproved)
 		{
+			Log.DebugFormat("CreateUser('{0}', '{1}', '{2}') beginning...", username, email, isApproved);
+
 			using (var conn = new NpgsqlConnection(ConnectionString))
 			{
 				conn.Open();
@@ -471,6 +486,7 @@ namespace pgProvider
 					comm.Parameters.Add("approved", NpgsqlTypes.NpgsqlDbType.Boolean).Value = isApproved;
 					comm.Parameters.Add("email_is_unique", NpgsqlTypes.NpgsqlDbType.Boolean).Value = _RequiresUniqueEmail;
 					var retval = Convert.ToInt32(comm.ExecuteScalar());
+					Log.DebugFormat("CreateUser('{0}', '{1}', '{2}') complete.", username, email, isApproved);
 					return retval;
 				}
 			}
@@ -584,6 +600,7 @@ namespace pgProvider
 		}
 		public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
 		{
+			Log.DebugFormat("GetAllUsers({0}, {1}, out int)", pageIndex, pageSize);
 			if (pageIndex < 0 || pageSize < 1)
 			{
 				totalRecords = 0;
@@ -602,10 +619,12 @@ namespace pgProvider
 						if (reader.HasRows)
 						{
 							var users = GetUsersFromReader(reader);
+							Log.DebugFormat("{0} record(s) collected.", users.Count);
 							return PaginateUserCollection(users, pageIndex, pageSize, out totalRecords);
 						}
 						else
 						{
+							Log.DebugFormat("No records collected.");
 							totalRecords = 0;
 							return new MembershipUserCollection();
 						}
@@ -629,7 +648,7 @@ namespace pgProvider
 		}
 		public override string GetPassword(string username, string answer)
 		{
-			Log.Debug(string.Format("GetPassword: username={0}, answer={1}", username, answer));
+			Log.DebugFormat("GetPassword: username={0}, answer={1}", username, answer);
 
 			if (this.PasswordFormat != MembershipPasswordFormat.Encrypted)
 			{
@@ -639,12 +658,12 @@ namespace pgProvider
 			if (ValidateAnswer(username, answer))
 			{
 				var password = DecryptPassword(GetCredentials(username).PasswordHash).ToCharacterString();
-				Log.Debug(string.Format("GetPassword: username={0}, answer={1}, password={2}", username, answer, password));
+				Log.DebugFormat("GetPassword: username={0}, answer={1}, password={2}", username, answer, password);
 				return password;
 			}
 			else
 			{
-				Log.Warn(string.Format("Password fetch failed for user '{0}'; the answer was incorrect.", username));
+				Log.WarnFormat("Password fetch failed for user '{0}'; the answer was incorrect.", username);
 				return null;
 			}
 		}
@@ -819,20 +838,20 @@ namespace pgProvider
 
 			if (_RequiresQuestionAndAnswer && !ValidateAnswer(username, answer))
 			{
-				Log.Warn(string.Format("User '{0}' failed to validate the security question.", username));
+				Log.WarnFormat("User '{0}' failed to validate the security question.", username);
 				return null;
 			}
 
 			var newPass = EncryptionHelper.GenerateSalt(8, 10);
 			ChangePassword(username, newPass);
-			Log.Info(string.Format("User '{0}' has reset their password.  The supplied password has bypassed complexity requirements.", username));
+			Log.InfoFormat("User '{0}' has reset their password.  The supplied password has bypassed complexity requirements.", username);
 			return newPass;
 		}
 		public override bool UnlockUser(string userName)
 		{
 			try
 			{
-				Log.Debug(string.Format("Unlocking user '{0}'...", userName));
+				Log.DebugFormat("Unlocking user '{0}'...", userName);
 				if (string.IsNullOrEmpty(userName)) throw new ArgumentException("username parameter is required.");
 
 				using (var conn = new NpgsqlConnection(ConnectionString))
@@ -844,7 +863,7 @@ namespace pgProvider
 						comm.Parameters.Add("_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = userName;
                         comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
                         comm.ExecuteNonQuery();
-						Log.Info(string.Format("User '{0}' has been unlocked.", userName));
+						Log.InfoFormat("User '{0}' has been unlocked.", userName);
 						return true;
 					}
 				}
@@ -859,7 +878,7 @@ namespace pgProvider
 		{
 			try
 			{
-				Log.Debug(string.Format("Persisting changes to user {0} ({1})...", user.ProviderUserKey, user.UserName));
+				Log.DebugFormat("Persisting changes to user {0} ({1})...", user.ProviderUserKey, user.UserName);
 				if (user == null) throw new ArgumentException("User parameter is required.");
 
 				using (var conn = new NpgsqlConnection(ConnectionString))
@@ -876,7 +895,7 @@ namespace pgProvider
 						comm.Parameters.Add("comments", NpgsqlTypes.NpgsqlDbType.Varchar, -1).Value = user.Comment;
 						comm.Parameters.Add("email_is_unique", NpgsqlTypes.NpgsqlDbType.Boolean).Value = _RequiresUniqueEmail;
 						comm.ExecuteNonQuery();
-						Log.Info(string.Format("User '{0}' has been updated.", user.UserName));
+						Log.InfoFormat("User '{0}' has been updated.", user.UserName);
 					}
 				}
 			}
@@ -889,20 +908,20 @@ namespace pgProvider
 		{
 			if (string.IsNullOrEmpty(password))
 			{
-				Log.Warn(string.Format("Password null or empty for use '{0}'.", username));
+				Log.WarnFormat("Password null or empty for use '{0}'.", username);
 				return false;
 			}
 
 			var creds = GetCredentials(username);
 			if (creds == null)
 			{
-				Log.Warn(string.Format("Credentials were not available for user '{0}'.", username));
+				Log.WarnFormat("Credentials were not available for user '{0}'.", username);
 				return false;
 			}
 
 			if (LockoutInEffect(creds.LockedOutAsOf))
 			{
-				Log.Warn(string.Format("User '{0}' is locked out and cannot authenticate.", username));
+				Log.WarnFormat("User '{0}' is locked out and cannot authenticate.", username);
 				return false;
 			}
 
@@ -928,16 +947,16 @@ namespace pgProvider
 
 			if (validated && user.IsApproved)
 			{
-				Log.Info(string.Format("User '{0}' successfully authenticated.", username));
+				Log.InfoFormat("User '{0}' successfully authenticated.", username);
 				return true;
 			}
 			else if (validated && !user.IsApproved)
 			{
-				Log.Warn(string.Format("User '{0}' successfully authenticated, but the account is not approved.", username));
+				Log.WarnFormat("User '{0}' successfully authenticated, but the account is not approved.", username);
 			}
 			else
 			{
-				Log.Warn(string.Format("User '{0}' failed to authenticate.", username));
+				Log.WarnFormat("User '{0}' failed to authenticate.", username);
 			}
 
 			return false;
@@ -946,7 +965,7 @@ namespace pgProvider
 		{
 			try
 			{
-				Log.Debug(string.Format("Recording Login Event: {0}, success: {1}...", username, success));
+				Log.DebugFormat("Recording Login Event: {0}, success: {1}...", username, success);
 				if (string.IsNullOrEmpty(username)) throw new ArgumentException("Username parameter is required.");
 
 				using (var conn = new NpgsqlConnection(ConnectionString))
@@ -963,7 +982,7 @@ namespace pgProvider
 						comm.Parameters.Add("attempt_window", NpgsqlTypes.NpgsqlDbType.Integer).Value = _PasswordAttemptWindow;
 						comm.Parameters.Add("attempt_count", NpgsqlTypes.NpgsqlDbType.Integer).Value = _MaxInvalidPasswordAttempts;
 						comm.ExecuteNonQuery();
-						Log.Debug(string.Format("Login event recorded: {0}, success: {1}", username, success));
+						Log.DebugFormat("Login event recorded: {0}, success: {1}", username, success);
 					}
 				}
 			}
@@ -1027,9 +1046,11 @@ namespace pgProvider
 		}
 		protected MembershipUserCollection PaginateUserCollection(MembershipUserCollection source, int pageIndex, int pageSize, out int totalRecords)
 		{
+			Log.DebugFormat("PaginateUserCollection(MembershipUserCollection, {0}, {1}, out int)", pageIndex, pageSize);
 			totalRecords = source.Count;
 			if (pageSize < 0) throw new ArgumentException("The page size cannot be less than zero.");
 			if (pageSize == 0) return source;
+			Log.DebugFormat("The MembershipUserCollection source contains {0} record(s).", totalRecords);
 
 			if (totalRecords > pageSize)
 			{
@@ -1039,6 +1060,7 @@ namespace pgProvider
 				{
 					newCollection.Add(user);
 				}
+				Log.DebugFormat("The returning MembershipUserCollection contains {0} record(s).", newCollection.Count);
 				return newCollection;
 			}
 			else

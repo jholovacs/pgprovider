@@ -53,8 +53,8 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net">
-      <HintPath>..\packages\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
+    <Reference Include="Common.Logging">
+      <HintPath>..\packages\Common.Logging.2.1.1\lib\net40\Common.Logging.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Security">
       <HintPath>..\packages\Npgsql.2.0.11\lib\Net40\Mono.Security.dll</HintPath>
@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CredentialPackage.cs" />
+    <Compile Include="DDLManager.cs" />
     <Compile Include="EncryptionMethods.cs" />
     <Compile Include="Exceptions\AccountLockedException.cs" />
     <Compile Include="Exceptions\AccountNotApprovedException.cs" />
@@ -85,13 +86,43 @@
     <Compile Include="Exceptions\PasswordComplexityException.cs" />
     <Compile Include="Exceptions\PasswordTooShortException.cs" />
     <Compile Include="Exceptions\ProviderConfigurationException.cs" />
-    <Compile Include="Helpers\EncryptionHelper.cs" />
+    <Compile Include="Exceptions\SuperUserPermissionsRequiredException.cs" />
+    <Compile Include="Helpers.cs" />
+    <Compile Include="Encryption.cs" />
     <Compile Include="pgMembershipProvider.cs" />
     <Compile Include="pgRoleProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ddl\ScriptDatabase.sql" />
+    <EmbeddedResource Include="DDL\v1.1\assign_users_to_roles.sql" />
+    <EmbeddedResource Include="DDL\v1.1\create_role.sql" />
+    <EmbeddedResource Include="DDL\v1.1\create_user.sql" />
+    <EmbeddedResource Include="DDL\v1.1\delete_role.sql" />
+    <EmbeddedResource Include="DDL\v1.1\delete_user.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_all_roles.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_all_users.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_online_count.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_roles_for_user.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_users_by_email.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_users_by_username.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_users_in_role.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_users_online.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_user_by_id.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_user_by_username.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_user_credentials.sql" />
+    <EmbeddedResource Include="DDL\v1.1\get_user_name_by_email.sql" />
+    <EmbeddedResource Include="DDL\v1.1\record_login_event.sql" />
+    <EmbeddedResource Include="DDL\v1.1\remove_users_from_roles.sql" />
+    <EmbeddedResource Include="DDL\v1.1\role_exists.sql" />
+    <EmbeddedResource Include="DDL\v1.1\Tables.sql" />
+    <EmbeddedResource Include="DDL\v1.1\Types.sql" />
+    <EmbeddedResource Include="DDL\v1.1\unlock_user.sql" />
+    <EmbeddedResource Include="DDL\v1.1\update_user.sql" />
+    <EmbeddedResource Include="DDL\v1.1\update_user_password.sql" />
+    <EmbeddedResource Include="DDL\v1.1\update_user_q_and_a.sql" />
+    <EmbeddedResource Include="DDL\v1.1\user_is_in_role.sql" />
+    <EmbeddedResource Include="DDL\v1.2\purge_activity.sql" />
+    <EmbeddedResource Include="DDL\v1.1\InitializeSettings.sql" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

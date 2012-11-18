@@ -12,7 +12,7 @@ namespace pgProvider
 	public class pgMembershipProvider : MembershipProvider
 	{
 		#region protected variables
-		protected static readonly log4net.ILog Log = log4net.LogManager.GetLogger(typeof(pgMembershipProvider));
+		protected static readonly Common.Logging.ILog Log = Common.Logging.LogManager.GetCurrentClassLogger();
 		protected string _Name = string.Empty;
 		protected string _ConnectionStringName = "pgProvider";
 		protected bool _EnablePasswordReset = true;
@@ -32,6 +32,7 @@ namespace pgProvider
 		protected int _MaxSaltCharacters = 60;
 		protected int _MinRequiredPasswordLength = 6;
 		protected static string ConnectionString = string.Empty;
+		protected string _dbOwner = "security";
 		#endregion
 
 		public override void Initialize(string name, NameValueCollection config)
@@ -163,6 +164,12 @@ namespace pgProvider
 				}
 				Log.DebugFormat("_SessionTime: {0}", _SessionTime);
 
+				if (config["dbOwner"] != null)
+				{
+					_dbOwner = config["dbOwner"];
+				}
+				Log.DebugFormat("_dbOwner: {0}", _dbOwner);
+
 				#endregion
 
 				#region validate configuration
@@ -224,6 +231,8 @@ namespace pgProvider
 				Log.Error(message, ex);
 				throw new ProviderConfigurationException(message, ex);
 			}
+
+			DDLManager.ValidateVersion(_ConnectionStringName, _dbOwner);
 		}
 		public override string ApplicationName
 		{
@@ -267,12 +276,12 @@ namespace pgProvider
 			{
 				case EncryptionMethods.Hash:
 					Log.DebugFormat("Hashing new password...");
-					salt = EncryptionHelper.GenerateSalt(_MinSaltCharacters, _MaxSaltCharacters);
-					hash = EncryptionHelper.GenerateHash(newPassword, salt);
+					salt = Encryption.GenerateSalt(_MinSaltCharacters, _MaxSaltCharacters);
+					hash = Encryption.GenerateHash(newPassword, salt);
 					break;
 				case EncryptionMethods.ReversibleSymmetric:
 					Log.DebugFormat("Encrypting new password...");
-					hash = EncryptionHelper.EncryptString(newPassword, _EncryptionKey);
+					hash = Encryption.EncryptString(newPassword, _EncryptionKey);
 					break;
 				default:
 					throw new ProviderConfigurationException("The encryption method for the membership provider cannot be determined.");
@@ -421,7 +430,6 @@ namespace pgProvider
 			Log.InfoFormat("Created user '{0}'.", username);
 			return GetUser(username, false);
 		}
-
 		protected void UpdateQAndA(string username, string question, string answer)
 		{
 			Log.DebugFormat("UpdateQAndA(string, string, string) for user '{0}' beginning...", username);
@@ -444,8 +452,8 @@ namespace pgProvider
 				Log.Warn("Questions and Answers are enabled, but they have not been properly provided.  No updates to the Questions and Answers will be performed at this time.", ex);
 			}
 
-			var salt = EncryptionHelper.GenerateSalt(_MinSaltCharacters, _MaxSaltCharacters);
-			var hash = EncryptionHelper.GenerateHash(modifiedAnswer, salt);
+			var salt = Encryption.GenerateSalt(_MinSaltCharacters, _MaxSaltCharacters);
+			var hash = Encryption.GenerateHash(modifiedAnswer, salt);
 
 			Log.DebugFormat("Updating the Q&A for '{0}' in the database...", username);
 			using (var conn = new NpgsqlConnection(ConnectionString))
@@ -842,7 +850,7 @@ namespace pgProvider
 				return null;
 			}
 
-			var newPass = EncryptionHelper.GenerateSalt(8, 10);
+			var newPass = Encryption.GenerateSalt(8, 10);
 			ChangePassword(username, newPass);
 			Log.InfoFormat("User '{0}' has reset their password.  The supplied password has bypassed complexity requirements.", username);
 			return newPass;
@@ -930,11 +938,11 @@ namespace pgProvider
 			switch (EncryptionMethod)
 			{
 				case EncryptionMethods.Hash:
-					var passwordHash = EncryptionHelper.GenerateHash(password, creds.PasswordSalt);
+					var passwordHash = Encryption.GenerateHash(password, creds.PasswordSalt);
 					validated = (passwordHash.ToBase64() == creds.PasswordHash.ToBase64());
 					break;
 				case EncryptionMethods.ReversibleSymmetric:
-					var persistedPassword = EncryptionHelper.DecryptString(creds.PasswordHash, _EncryptionKey).ToCharacterString();
+					var persistedPassword = Encryption.DecryptString(creds.PasswordHash, _EncryptionKey).ToCharacterString();
 					validated = (persistedPassword == password);
 					break;
 				default:
@@ -993,11 +1001,11 @@ namespace pgProvider
 		}
 		protected override byte[] DecryptPassword(byte[] encodedPassword)
 		{
-			return EncryptionHelper.DecryptString(encodedPassword, _EncryptionKey);
+			return Encryption.DecryptString(encodedPassword, _EncryptionKey);
 		}
 		protected override byte[] EncryptPassword(byte[] password)
 		{
-			return EncryptionHelper.EncryptString(password, _EncryptionKey);
+			return Encryption.EncryptString(password, _EncryptionKey);
 		}
 		protected bool ValidateAnswer(string username, string answer)
 		{
@@ -1007,7 +1015,7 @@ namespace pgProvider
 			if (creds == null) throw new InvalidOperationException("Credentials were not available for the specified user.");
 
 			var cleanedAnswer = OnlyTheAlphanumericLowercase(answer);
-			var hashedAnswer = EncryptionHelper.GenerateHash(cleanedAnswer, creds.AnswerSalt);
+			var hashedAnswer = Encryption.GenerateHash(cleanedAnswer, creds.AnswerSalt);
 			return (hashedAnswer.ToBase64() == creds.AnswerHash.ToBase64());
 		}
 		protected CredentialPackage GetCredentials(string username)
@@ -1080,6 +1088,19 @@ namespace pgProvider
 			get
 			{
 				return _Name;
+			}
+		}
+		public void PurgeActivity(long secondsOld)
+		{
+			using (var conn = new NpgsqlConnection(ConnectionString))
+			{
+				conn.Open();
+				using (var comm = new NpgsqlCommand("purge_activity", conn))
+				{
+					comm.CommandType = System.Data.CommandType.StoredProcedure;
+					comm.Parameters.Add("olderthan", NpgsqlTypes.NpgsqlDbType.Bigint).Value = secondsOld;
+					comm.ExecuteNonQuery();
+				}
 			}
 		}
 	}

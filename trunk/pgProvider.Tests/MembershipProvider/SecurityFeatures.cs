@@ -1,6 +1,5 @@
 ﻿using System.Collections.Specialized;
 using System.Web.Security;
-using log4net;
 using NUnit.Framework;
 
 namespace pgProvider.Tests.MembershipProvider
@@ -16,7 +15,7 @@ namespace pgProvider.Tests.MembershipProvider
         private MembershipCreateStatus status;
         private MembershipUser user;
         private string defaultPassword;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SecurityFeatures));
+		private static readonly Common.Logging.ILog Log = Common.Logging.LogManager.GetCurrentClassLogger();
 
         [SetUp]
         protected void TestSetup()

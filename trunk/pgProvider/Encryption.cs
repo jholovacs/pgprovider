@@ -6,8 +6,9 @@ using System.Text;
 
 namespace pgProvider
 {
-	public static class EncryptionHelper
+	public class Encryption
 	{
+		protected static readonly Common.Logging.ILog Log = Common.Logging.LogManager.GetCurrentClassLogger();
 		private const string SaltChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
 		private const string SpecialChars = @"()*&^%$#@!`~/?;:.>,<\|=+-_";
 		private static int SaltCharLength = SaltChars.Length;
@@ -16,6 +17,7 @@ namespace pgProvider
 
 		public static string GenerateSalt(int minChars, int maxChars)
 		{
+			Log.DebugFormat("GenerateSalt({0}, {1})", minChars, maxChars);
 			if (minChars <= 0) throw new ArgumentOutOfRangeException("minChars");
 			if (maxChars < minChars) throw new ArgumentOutOfRangeException("maxChars");
 
@@ -30,13 +32,16 @@ namespace pgProvider
 
 		public static int GenerateTrueRandomNumber(int min, int max)
 		{
+			Log.DebugFormat("GenerateTrueRandomNumber({0}, {1})", min, max);
 			if (min == max) return min;
 			int range = max - min;
 			byte[] buffer = BitConverter.GetBytes(range);
 			crypt.GetBytes(buffer);
 			var rndValue = (decimal)Math.Abs(BitConverter.ToInt32(buffer, 0));
 			var integral = (decimal)int.MaxValue / (decimal)range;
-			return ((int)(rndValue / integral) + min);
+			var value = ((int)(rndValue / integral) + min);
+			Log.DebugFormat("Returning {0}", value);
+			return value;
 		}
 
 		public static byte[] GenerateHash(string toHash, string salt)
@@ -101,22 +106,11 @@ namespace pgProvider
 						{
 							byte[] decrypted = new byte[encryptedString.Length];
 							var byteCount = cs.Read(decrypted, 0, encryptedString.Length);
-							//return Encoding.UTF8.GetString(decrypted, 0, byteCount);
 							return decrypted;
 						}
 					}
 				}
 			}
-		}
-
-		public static string ToBase64(this byte[] target)
-		{
-			return Convert.ToBase64String(target);
-		}
-
-		public static string ToCharacterString(this byte[] target)
-		{
-			return Encoding.UTF8.GetString(target).TrimEnd(new char[]{'\0'});
 		}
 
 		public static byte[] GenerateAESKey()
@@ -127,26 +121,6 @@ namespace pgProvider
 				provider.GenerateKey();
 				return provider.Key;
 			}
-		}
-
-		public static byte[] ToByteArray(this string target)
-		{
-			return Encoding.UTF8.GetBytes(target);
-		}
-
-		public static int ToInt(this string target, int defaultValue)
-		{
-			int toChange;
-			if (int.TryParse(target, out toChange))
-			{
-				return toChange;
-			}
-			return defaultValue;
-		}
-
-		public static int ToInt(this string target)
-		{
-			return target.ToInt(0);
 		}
 	}
 }

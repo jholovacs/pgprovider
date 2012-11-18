@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using System;
 using System.Configuration.Provider;
-using log4net;
 
 namespace pgProvider.Tests.RoleProvider
 {
@@ -14,7 +13,7 @@ namespace pgProvider.Tests.RoleProvider
 		private NameValueCollection config;
 		private NameValueCollection mconfig;
 		private System.Web.Security.MembershipCreateStatus status;
-		private static readonly ILog Log = LogManager.GetLogger(typeof(ProviderCompliance));
+		private static readonly Common.Logging.ILog Log = Common.Logging.LogManager.GetCurrentClassLogger();
 
 		[SetUp]
 		public void Setup()

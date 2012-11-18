@@ -15,7 +15,7 @@ namespace pgProvider.Tests.MembershipProvider
 		private MembershipCreateStatus status;
 		private MembershipUser user;
 		private string defaultPassword;
-		private static string encryptionKey = EncryptionHelper.GenerateAESKey().ToBase64();
+		private static string encryptionKey = Encryption.GenerateAESKey().ToBase64();
 
 		[SetUp]
 		protected void TestSetup()

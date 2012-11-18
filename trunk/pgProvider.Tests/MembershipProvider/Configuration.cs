@@ -68,7 +68,7 @@ namespace pgProvider.Tests.MembershipProvider
 		public void EnablePasswordRetreival()
 		{
 			config["enablePasswordRetrieval"] = "true";
-			config["encryptionKey"] = EncryptionHelper.GenerateAESKey().ToBase64(); //throws config error if this is not provided (see test)
+			config["encryptionKey"] = Encryption.GenerateAESKey().ToBase64(); //throws config error if this is not provided (see test)
 			TestInitialize();
 			Assert.IsTrue(provider.EnablePasswordRetrieval == true);
 		}
@@ -188,7 +188,7 @@ namespace pgProvider.Tests.MembershipProvider
 		public void PasswordFormatEncrypted()
 		{
 			config["enablePasswordRetrieval"] = "true";
-			config["encryptionKey"] = EncryptionHelper.GenerateAESKey().ToBase64(); //throws config error if this is not provided (see test)
+			config["encryptionKey"] = Encryption.GenerateAESKey().ToBase64(); //throws config error if this is not provided (see test)
 			TestInitialize();
 			Assert.IsTrue(provider.PasswordFormat == System.Web.Security.MembershipPasswordFormat.Encrypted);
 		}
@@ -295,7 +295,7 @@ namespace pgProvider.Tests.MembershipProvider
 		public void EnablingPasswordRetrievalSetsToEncrypted()
 		{
 			config["enablePasswordRetrieval"] = "true";
-			config["encryptionKey"] = EncryptionHelper.GenerateAESKey().ToBase64(); //throws config error if this is not provided (see test)
+			config["encryptionKey"] = Encryption.GenerateAESKey().ToBase64(); //throws config error if this is not provided (see test)
 			TestInitialize();
 			Assert.IsTrue(provider.PasswordFormat == System.Web.Security.MembershipPasswordFormat.Encrypted);
 		}

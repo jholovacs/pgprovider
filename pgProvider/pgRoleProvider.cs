@@ -22,21 +22,21 @@ namespace pgProvider
 		{
 			try
 			{
-				Log.Debug("pgRoleProvider Initialize() invoked.");
+				Log.Debug(d=>d("pgRoleProvider Initialize() invoked."));
 
 				_Name = name ?? config["name"];
 
 				_ConnectionStringName = config["connectionStringName"] ?? _ConnectionStringName;
-				Log.DebugFormat("_ConnectionStringName: {0}", _ConnectionStringName);
+				Log.Debug(d=>d("_ConnectionStringName: {0}", _ConnectionStringName));
 
 				_ApplicationName = config["applicationName"] ?? _ApplicationName;
-				Log.DebugFormat("_ApplicationName: {0}", _ApplicationName);
+				Log.Debug(d=>d("_ApplicationName: {0}", _ApplicationName));
 				
 				if (config["dbOwner"] != null)
 				{
 					_dbOwner = config["dbOwner"];
 				}
-				Log.DebugFormat("_dbOwner: {0}", _dbOwner);
+				Log.Debug(d=>d("_dbOwner: {0}", _dbOwner));
 
 				if (_ApplicationName.Length > 250) throw new ProviderConfigurationException("The maximum length for an application name is 250 characters.");
 
@@ -50,9 +50,9 @@ namespace pgProvider
 				}
 
 				ConnectionString = ConfigurationManager.ConnectionStrings[_ConnectionStringName].ConnectionString;
-				Log.DebugFormat("ConnectionString: {0}", ConnectionString);
+				Log.Debug(d => d("ConnectionString: {0}", ConnectionString));
 
-				Log.Debug("Checking to make sure the specified connection string can connect...");
+				Log.Debug(d=>d("Checking to make sure the specified connection string can connect..."));
 				using (var conn = new NpgsqlConnection(ConnectionString))
 				{
 					conn.Open();
@@ -86,7 +86,7 @@ namespace pgProvider
 
 			try
 			{
-				Log.DebugFormat("Adding users ({0}) to roles ({1})...", string.Join(", ", usernames), string.Join(", ", roleNames));
+				Log.Debug(d => d("Adding users ({0}) to roles ({1})...", string.Join(", ", usernames), string.Join(", ", roleNames)));
 				using (var conn = new NpgsqlConnection(ConnectionString))
 				{
 					conn.Open();
@@ -99,7 +99,7 @@ namespace pgProvider
 						comm.ExecuteNonQuery();
 					}
 				}
-				Log.InfoFormat("Added users ({0}) to roles ({1}).", string.Join(", ", usernames), string.Join(", ", roleNames));
+				Log.Info(i => i("Added users ({0}) to roles ({1}).", string.Join(", ", usernames), string.Join(", ", roleNames)));
 			}
 			catch (NpgsqlException ex)
 			{
@@ -126,7 +126,7 @@ namespace pgProvider
 		}
 		public override void CreateRole(string roleName)
 		{
-			Log.DebugFormat("CreateRole(\"{0}\")", roleName);
+			Log.Debug(d => d("CreateRole(\"{0}\")", roleName));
 			if (roleName == null) throw new ArgumentNullException();
 			if (roleName.Trim() == string.Empty) throw new ArgumentException("A role name cannot be empty.");
 			if (roleName.Contains(",")) throw new ArgumentException("A role name cannot contain commas.  Blame Microsoft for that rule!");
@@ -161,7 +161,7 @@ namespace pgProvider
 		}
 		public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)
 		{
-			Log.DebugFormat("DeleteRole(\"{0}\", {1})", roleName, throwOnPopulatedRole);
+			Log.Debug(d => d("DeleteRole(\"{0}\", {1})", roleName, throwOnPopulatedRole));
 			if (roleName == null) throw new ArgumentNullException();
 			if (roleName.Trim() == string.Empty) throw new ArgumentException("The specified role name cannot be empty.");
 			try
@@ -197,12 +197,12 @@ namespace pgProvider
 		}
 		public override string[] FindUsersInRole(string roleName, string usernameToMatch)
 		{
-			Log.DebugFormat("FindUsersInRole(\"{0}\", \"{1}\")", roleName, usernameToMatch);
+			Log.Debug(d => d("FindUsersInRole(\"{0}\", \"{1}\")", roleName, usernameToMatch));
 			return GetUsersInRole(roleName, usernameToMatch);
 		}
 		protected string[] GetUsersInRole(string rolename, string usernameToMatch)
 		{
-			Log.DebugFormat("GetUsersInRole(\"{0}\", \"{1}\")", rolename, usernameToMatch);
+			Log.Debug(d => d("GetUsersInRole(\"{0}\", \"{1}\")", rolename, usernameToMatch));
 			if (rolename == null) throw new ArgumentNullException();
 			if (rolename == string.Empty) throw new ProviderException("Cannot look for blank role names.");
 			usernameToMatch = usernameToMatch ?? string.Empty;
@@ -245,7 +245,7 @@ namespace pgProvider
 		}
 		public override string[] GetAllRoles()
 		{
-			Log.Debug("GetAllRoles()");
+			Log.Debug(d=>d("GetAllRoles()"));
 			using (var conn = new NpgsqlConnection(ConnectionString))
 			{
 				conn.Open();
@@ -268,7 +268,7 @@ namespace pgProvider
 		}
 		public override string[] GetRolesForUser(string username)
 		{
-			Log.DebugFormat("GetRolesForUser(\"{0}\")", username);
+			Log.Debug(d => d("GetRolesForUser(\"{0}\")", username));
 			if (username == null) throw new ArgumentNullException();
 			if (username.Trim() == string.Empty) throw new ArgumentException("The specified username cannot be blank.");
 			using (var conn = new NpgsqlConnection(ConnectionString))
@@ -294,12 +294,12 @@ namespace pgProvider
 		}
 		public override string[] GetUsersInRole(string roleName)
 		{
-			Log.DebugFormat("GetUsersInRole(\"{0}\")", roleName);
+			Log.Debug(d => d("GetUsersInRole(\"{0}\")", roleName));
 			return GetUsersInRole(roleName, string.Empty);
 		}
 		public override bool IsUserInRole(string username, string roleName)
 		{
-			Log.DebugFormat("IsUserInRole(\"{0}\", \"{1}\")", username, roleName);
+			Log.Debug(d => d("IsUserInRole(\"{0}\", \"{1}\")", username, roleName));
 			if (username == null || roleName == null) throw new ArgumentNullException();
 			if (username.Trim() == string.Empty) throw new ArgumentException("The specified username cannot be blank.");
 			if (roleName.Trim() == string.Empty) throw new ArgumentException("The specified role name cannot be blank.");
@@ -347,7 +347,7 @@ namespace pgProvider
 
 			try
 			{
-				Log.DebugFormat("Removing users ({0}) from roles ({1})...", string.Join(", ", usernames), string.Join(", ", roleNames));
+				Log.Debug(d => d("Removing users ({0}) from roles ({1})...", string.Join(", ", usernames), string.Join(", ", roleNames)));
 				using (var conn = new NpgsqlConnection(ConnectionString))
 				{
 					conn.Open();
@@ -373,7 +373,7 @@ namespace pgProvider
 		}
 		public override bool RoleExists(string roleName)
 		{
-			Log.DebugFormat("RoleExists(\"{0}\")", roleName);
+			Log.Debug(d => d("RoleExists(\"{0}\")", roleName));
 			using (var conn = new NpgsqlConnection(ConnectionString))
 			{
 				conn.Open();

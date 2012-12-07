@@ -17,7 +17,7 @@ namespace pgProvider
 
 		public static string GenerateSalt(int minChars, int maxChars)
 		{
-			Log.DebugFormat("GenerateSalt({0}, {1})", minChars, maxChars);
+			Log.Debug(d => d("GenerateSalt({0}, {1})", minChars, maxChars));
 			if (minChars <= 0) throw new ArgumentOutOfRangeException("minChars");
 			if (maxChars < minChars) throw new ArgumentOutOfRangeException("maxChars");
 
@@ -32,7 +32,7 @@ namespace pgProvider
 
 		public static int GenerateTrueRandomNumber(int min, int max)
 		{
-			Log.DebugFormat("GenerateTrueRandomNumber({0}, {1})", min, max);
+			Log.Debug(d=>d("GenerateTrueRandomNumber({0}, {1})", min, max));
 			if (min == max) return min;
 			int range = max - min;
 			byte[] buffer = BitConverter.GetBytes(range);
@@ -40,7 +40,7 @@ namespace pgProvider
 			var rndValue = (decimal)Math.Abs(BitConverter.ToInt32(buffer, 0));
 			var integral = (decimal)int.MaxValue / (decimal)range;
 			var value = ((int)(rndValue / integral) + min);
-			Log.DebugFormat("Returning {0}", value);
+			Log.Debug(d => d("Returning {0}", value));
 			return value;
 		}
 

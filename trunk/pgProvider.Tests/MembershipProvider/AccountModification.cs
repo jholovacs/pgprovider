@@ -69,6 +69,34 @@ namespace pgProvider.Tests.MembershipProvider
 
 		#region Tests
 		[Test]
+		public void CaseInsensitiveGetUser()
+		{
+			TestInitialize();
+			var user2 = provider.GetUser(user.UserName.ToLowerInvariant(), false);
+			var user3 = provider.GetUser(user.UserName.ToUpperInvariant(), false);
+			Assert.IsTrue((int)user.ProviderUserKey == (int)user2.ProviderUserKey);
+			Assert.IsTrue((int)user.ProviderUserKey == (int)user3.ProviderUserKey);
+		}
+
+		[Test]
+		public void CaseInsensitiveGetUserNameByEmail()
+		{
+			TestInitialize();
+			var user2 = provider.GetUserNameByEmail(user.Email.ToLowerInvariant());
+			var user3 = provider.GetUserNameByEmail(user.Email.ToUpperInvariant());
+			Assert.IsTrue(user.UserName == user2);
+			Assert.IsTrue(user.UserName == user3);
+		}
+
+		[Test]
+		public void CaseInsensitiveValidate()
+		{
+			TestInitialize();
+			Assert.IsTrue(provider.ValidateUser(user.UserName.ToUpperInvariant(), defaultPassword));
+			Assert.IsTrue(provider.ValidateUser(user.UserName.ToLowerInvariant(), defaultPassword));
+		}
+
+		[Test]
 		public void CommentChangesSave()
 		{
 			TestInitialize();

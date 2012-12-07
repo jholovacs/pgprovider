@@ -15,18 +15,18 @@ namespace pgProvider
 		internal static void ValidateVersion(string connectionStringName, string owner)
 		{
 			_ConnectionStringName = connectionStringName;
-			var updatesRequired = false;
 			//open the connection, start the transaction
 			using (var conn = new Npgsql.NpgsqlConnection(ConfigurationManager.ConnectionStrings[_ConnectionStringName].ConnectionString))
 			{
 				conn.Open();
 				using (var trans = conn.BeginTransaction())
 				{
+					#region v1.1
 					//test up to v1.1.  This is basicially the entire original schema.
-					Log.DebugFormat("Checking for v1.1 schema...");
+					Log.Debug(d=>d("Checking for v1.1 schema..."));
 					if (!TableExists("users", conn, trans))
 					{
-						Log.InfoFormat("The database does not seem to be compatible with v1.1.  Updating...");
+						Log.Info(i => i("The database does not seem to be compatible with v1.1.  Updating..."));
 						RunScript(GetDDLResource("v1._1.InitializeSettings.sql"), null, conn, trans);
 						RunScript(GetDDLResource("v1._1.Tables.sql"), null, conn, trans);
 						RunScript(GetDDLResource("v1._1.Types.sql"), null, conn, trans);
@@ -55,36 +55,60 @@ namespace pgProvider
 						RunStatement(GetDDLResource("v1._1.remove_users_from_roles.sql"), null, conn, trans);
 						RunStatement(GetDDLResource("v1._1.role_exists.sql"), null, conn, trans);
 						RunStatement(GetDDLResource("v1._1.assign_users_to_roles.sql"), null, conn, trans);
-
-						updatesRequired = true;
 					}
+					#endregion
 
+					#region v1.2
 					//test up to v1.2.  This adds the purge activity feature, for cleaning up old data.
-					Log.DebugFormat("Checking for v1.2 schema...");
+					Log.Debug(d => d("Checking for v1.2 schema..."));
 					if (!FunctionExists("purge_activity", conn, trans))
 					{
-						Log.InfoFormat("The database does not seem to be compatible with v1.2.  Updating...");
+						Log.Info(i => i("The database does not seem to be compatible with v1.2.  Updating..."));
 						RunStatement(GetDDLResource("v1._2.purge_activity.sql"), null, conn, trans);
-						updatesRequired = true;
 					}
+					#endregion
+
+					#region v1.3
+					//test up to v1.3.  This makes users, roles, and applications case-insensitive.
+					//also adds the version table to check against future versions.
+					Log.Debug(d => d("Checking for v1.3 schema..."));
+					if (!TableExists("versions", conn, trans))
+					{
+						Log.Info(i => i("The database does not seem to be compatible with v1.3.  Updating..."));
+						RunScript(GetDDLResource("v1._3.TableChanges.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.assign_users_to_role.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.create_role.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.create_user.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.delete_role.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.delete_user.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_all_roles.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_all_users.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_online_count.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_roles_for_user.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_user_by_username.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_user_credentials.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_user_name_by_email.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_users_by_email.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_users_by_username.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_users_in_role.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.get_users_online.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.record_login_event.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.role_exists.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.remove_users_from_roles.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.unlock_user.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.update_user.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.update_user_password.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.update_user_q_and_a.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._3.user_is_in_role.sql"), null, conn, trans);
+					}
+
+					#endregion
 
 					/*
 					 * Other checks and updates will go here.
 					 * 
 					 * 
-					 */ 
-
-					////Now that all DDL changes have been made, set the ownership properly.
-					//if (updatesRequired)
-					//{
-					//    Log.DebugFormat("Updating the owner of the database objects to '{0}'...", owner);
-					//    var ownerscript = GetDDLResource("SetOwner.sql");
-					//    var ownerparameters = new Dictionary<string, Npgsql.NpgsqlParameter>();
-					//    var ownerparameter = new Npgsql.NpgsqlParameter("@owner", NpgsqlTypes.NpgsqlDbType.Varchar, 255);
-					//    ownerparameter.Value = owner;
-					//    ownerparameters.Add("@owner", ownerparameter);
-					//    RunScript(ownerscript, ownerparameters, conn, trans);
-					//}
+					 */
 
 					trans.Commit();
 				}
@@ -165,7 +189,7 @@ namespace pgProvider
 		{
 			var fqResourceName = string.Format("pgProvider.DDL.{0}", resourceName);
 			var assy = typeof(DDLManager).Assembly;
-			Log.DebugFormat("Collecting resource '{0}'...", fqResourceName);
+			Log.Debug(d => d("Collecting resource '{0}'...", fqResourceName));
 
 			using (var sr = new System.IO.StreamReader(assy.GetManifestResourceStream(fqResourceName)))
 			{
@@ -180,7 +204,7 @@ namespace pgProvider
 			foreach (var commandText in script.Split(';'))
 			{
 				var sql = commandText + ";";
-				Log.DebugFormat("Script command: {0}", sql);
+				Log.Debug(d=>d("Script command: {0}", sql));
 
 				using (var cmd = new Npgsql.NpgsqlCommand(sql, conn, trans))
 				{
@@ -189,14 +213,14 @@ namespace pgProvider
 						if (sql.Contains(parameter))
 						{
 							var value = parameters[parameter];
-							Log.DebugFormat("The command contains the parameter '{0}', setting value to '{1}'...", parameter, value.Value);
+							Log.Debug(d => d("The command contains the parameter '{0}', setting value to '{1}'...", parameter, value.Value));
 							cmd.Parameters.Add(value);
 						}
 					}
 					cmd.ExecuteNonQuery();
 				}
 			}
-			Log.DebugFormat("Script complete.");
+			Log.Debug(d=>d("Script complete."));
 		}
 		protected static void RunStatement(string statement, IDictionary<string, Npgsql.NpgsqlParameter> parameters, Npgsql.NpgsqlConnection conn, Npgsql.NpgsqlTransaction trans)
 		{
@@ -208,7 +232,7 @@ namespace pgProvider
 					if (statement.Contains(parameter))
 					{
 						var value = parameters[parameter];
-						Log.DebugFormat("The command contains the parameter '{0}', setting value to '{1}'...", parameter, value.Value);
+						Log.Debug(d => d("The command contains the parameter '{0}', setting value to '{1}'...", parameter, value.Value));
 						cmd.Parameters.Add(value);
 					}
 				}

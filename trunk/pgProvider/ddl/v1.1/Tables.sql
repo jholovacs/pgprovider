@@ -81,13 +81,3 @@ ALTER TABLE ONLY users_roles ADD CONSTRAINT users_roles_role_id_fkey FOREIGN KEY
 ALTER TABLE ONLY users_roles ADD CONSTRAINT users_roles_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 DROP TABLE IF EXISTS profiles CASCADE;
-CREATE TABLE profiles
-(
-  user_id integer NOT NULL,
-  property_name character varying(250) NOT NULL,
-  property_value text,
-  CONSTRAINT profiles_pkey PRIMARY KEY (user_id , property_name ),
-  CONSTRAINT fk_profiles_users FOREIGN KEY (user_id)
-      REFERENCES users (user_id) MATCH SIMPLE
-      ON UPDATE CASCADE ON DELETE CASCADE
-);

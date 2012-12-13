@@ -187,7 +187,7 @@ namespace pgProvider
 		}
 		protected static string GetDDLResource(string resourceName)
 		{
-			var fqResourceName = string.Format("pgProvider.DDL.{0}", resourceName);
+			var fqResourceName = string.Format("pgProvider.ddl.{0}", resourceName);
 			var assy = typeof(DDLManager).Assembly;
 			Log.Debug(d => d("Collecting resource '{0}'...", fqResourceName));
 

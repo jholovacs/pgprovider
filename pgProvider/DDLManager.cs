@@ -23,7 +23,7 @@ namespace pgProvider
 				{
 					#region v1.1
 					//test up to v1.1.  This is basicially the entire original schema.
-					Log.Debug(d=>d("Checking for v1.1 schema..."));
+					Log.Debug(d => d("Checking for v1.1 schema..."));
 					if (!TableExists("users", conn, trans))
 					{
 						Log.Info(i => i("The database does not seem to be compatible with v1.1.  Updating..."));
@@ -204,7 +204,7 @@ namespace pgProvider
 			foreach (var commandText in script.Split(';'))
 			{
 				var sql = commandText + ";";
-				Log.Debug(d=>d("Script command: {0}", sql));
+				Log.Debug(d => d("Script command: {0}", sql));
 
 				using (var cmd = new Npgsql.NpgsqlCommand(sql, conn, trans))
 				{
@@ -220,7 +220,7 @@ namespace pgProvider
 					cmd.ExecuteNonQuery();
 				}
 			}
-			Log.Debug(d=>d("Script complete."));
+			Log.Debug(d => d("Script complete."));
 		}
 		protected static void RunStatement(string statement, IDictionary<string, Npgsql.NpgsqlParameter> parameters, Npgsql.NpgsqlConnection conn, Npgsql.NpgsqlTransaction trans)
 		{

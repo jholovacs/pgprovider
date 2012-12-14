@@ -10,7 +10,7 @@ create index ix_users_last_activity on users using btree (lower(application_name
 drop index if exists ux_users_user_name_application_name;
 create unique index ux_users_user_name_application_name on users using btree(lower(application_name), lower(user_name));
 
-create table if not exists versions
+create table versions
 	(
 	name varchar(250) not null primary key,
 	version varchar(15) not null

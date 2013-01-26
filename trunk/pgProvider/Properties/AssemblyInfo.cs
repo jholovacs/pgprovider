@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("pgProvider")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Membership and Role Provider for PostgreSQL 8.4+")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("HP")]
+[assembly: AssemblyCompany("Private User")]
 [assembly: AssemblyProduct("pgProvider")]
-[assembly: AssemblyCopyright("Copyright © HP 2011")]
+[assembly: AssemblyCopyright(pgProvider.License.Text)]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

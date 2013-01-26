@@ -89,6 +89,7 @@
     <Compile Include="Exceptions\SuperUserPermissionsRequiredException.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Encryption.cs" />
+    <Compile Include="License.cs" />
     <Compile Include="pgMembershipProvider.cs" />
     <Compile Include="pgRoleProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

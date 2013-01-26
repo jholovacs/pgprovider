@@ -1,6 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.Web.Security;
 using NUnit.Framework;
+using System;
 
 namespace pgProvider.Tests.MembershipProvider
 {
@@ -68,6 +69,17 @@ namespace pgProvider.Tests.MembershipProvider
 		#endregion
 
 		#region Tests
+		[Test]
+		public void LastLoginUpdates()
+		{
+			TestInitialize();
+			var user1 = provider.GetUser(user.UserName, false);
+			Assert.IsTrue(user1.LastLoginDate == DateTime.MinValue, "Expected no last login date, there was a login date.");
+			Assert.IsTrue(provider.ValidateUser(user.UserName, defaultPassword));
+			var user2 = provider.GetUser(user.UserName, false);
+			Assert.IsTrue(user2.LastLoginDate != DateTime.MinValue, "Expected a last login date, there wasn't a login date.");
+		}
+
 		[Test]
 		public void CaseInsensitiveGetUser()
 		{

@@ -21,6 +21,7 @@ namespace pgProvider
 				conn.Open();
 				using (var trans = conn.BeginTransaction())
 				{
+
 					#region v1.1
 					//test up to v1.1.  This is basicially the entire original schema.
 					Log.Debug(d => d("Checking for v1.1 schema..."));
@@ -104,12 +105,35 @@ namespace pgProvider
 
 					#endregion
 
+					//v1.3 is the first version that includes version tracking in the database.
+					var currentVersion = GetDBVersion(conn, trans);
+
+					#region v1.4
+					Log.Debug(d => d("Checking for v1.4 schema (no DDL action required)..."));
+					if (currentVersion == "1.3") currentVersion = "1.4";
+					#endregion
+
+					#region v1.5
+					Log.Debug(d => d("Checking for v1.5 schema (no DDL action required)..."));
+					if (currentVersion == "1.4") currentVersion = "1.5";
+					#endregion
+
+					#region v1.6
+					if (currentVersion == "1.5")
+					{
+						//v1.6 fixes an update problem where the last login time was not being persisted.
+						RunStatement(GetDDLResource("v1._6.record_login_event.sql"), null, conn, trans);
+						currentVersion = "1.6";
+					}
+					#endregion
+
 					/*
 					 * Other checks and updates will go here.
 					 * 
 					 * 
 					 */
 
+					SetDBVersion(conn, trans, currentVersion);
 					trans.Commit();
 				}
 			}
@@ -247,5 +271,23 @@ namespace pgProvider
 					string.Format("The database schema is out of date, but the current credentials do not have the superuser access required to update the schema."));
 			}
 		}
+		protected static string GetDBVersion(Npgsql.NpgsqlConnection conn, Npgsql.NpgsqlTransaction trans)
+		{
+			using (var cmd = new Npgsql.NpgsqlCommand("select version from versions where name='application' limit 1;", conn, trans))
+			{
+				cmd.CommandType = System.Data.CommandType.Text;
+				return (string)cmd.ExecuteScalar();
+			}
+		}
+		protected static void SetDBVersion(Npgsql.NpgsqlConnection conn, Npgsql.NpgsqlTransaction trans, string versionNumber)
+		{
+			using (var cmd = new Npgsql.NpgsqlCommand("update versions set version = @version where name = 'application';", conn, trans))
+			{
+				cmd.CommandType = System.Data.CommandType.Text;
+				cmd.Parameters.Add("@version", NpgsqlTypes.NpgsqlDbType.Varchar, 15).Value = versionNumber;
+				cmd.ExecuteNonQuery();
+			}
+		}
+
 	}
 }

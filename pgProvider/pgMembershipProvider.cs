@@ -731,11 +731,11 @@ namespace pgProvider
 					reader.IsDBNull(commentsColumn) ? string.Empty : reader.GetString(commentsColumn),
 					reader.IsDBNull(approvedColumn) ? false : reader.GetBoolean(approvedColumn),
 					reader.IsDBNull(lastLockoutColumn) ? false : LockoutInEffect(reader.GetDateTime(lastLockoutColumn)),
-					reader.IsDBNull(createdColumn) ? DateTime.Today : reader.GetDateTime(createdColumn),
-					reader.IsDBNull(lastLoginColumn) ? DateTime.Today : reader.GetDateTime(lastLoginColumn),
-					reader.IsDBNull(lastActivityColumn) ? DateTime.Today : reader.GetDateTime(lastActivityColumn),
-					reader.IsDBNull(lastPasswordChangedColumn) ? DateTime.Today : reader.GetDateTime(lastPasswordChangedColumn),
-					reader.IsDBNull(lastLockoutColumn) ? DateTime.Today : reader.GetDateTime(lastLockoutColumn)
+					reader.IsDBNull(createdColumn) ? DateTime.MinValue : reader.GetDateTime(createdColumn),
+					reader.IsDBNull(lastLoginColumn) ? DateTime.MinValue : reader.GetDateTime(lastLoginColumn),
+					reader.IsDBNull(lastActivityColumn) ? DateTime.MinValue : reader.GetDateTime(lastActivityColumn),
+					reader.IsDBNull(lastPasswordChangedColumn) ? DateTime.MinValue : reader.GetDateTime(lastPasswordChangedColumn),
+					reader.IsDBNull(lastLockoutColumn) ? DateTime.MinValue : reader.GetDateTime(lastLockoutColumn)
 					);
 
 				users.Add(user);

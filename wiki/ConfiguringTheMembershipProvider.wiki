@@ -21,10 +21,16 @@ A typical implementation of the configuration in the web.config file will resemb
 	<system.web>
 		<membership defaultProvider="pgMembershipProvider">
 			<providers>
-				<remove name="AspNetSqlMembershipProvider"/>
+				<clear />
 				<add name="pgMembershipProvider" type="pgProvider.pgMembershipProvider, pgProvider" applicationName="pgProvider.Tests"/>
 			</providers>
 		</membership>
+		<roleManager defaultProvider="pgRoleProvider">
+			<providers>
+				<clear />
+				<add name="pgRoleProvider" type="pgProvider.pgRoleProvider, pgProvider" applicationName="pgProvider.Tests"/>
+			</providers>
+		</roleManager>
 	</system.web>
 	<log4net>
 		<appender name="ConsoleAppender" type="log4net.Appender.ConsoleAppender">

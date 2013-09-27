@@ -127,6 +127,16 @@ namespace pgProvider
 					}
 					#endregion
 
+					#region v1.7
+
+					if (currentVersion == "1.6")
+					{
+						RunStatement(GetDDLResource("v1._7.get_number_of_users_online.sql"), null, conn, trans);
+						RunStatement(GetDDLResource("v1._7.get_users_online.sql"), null, conn, trans);
+						currentVersion = "1.7";
+					}
+					#endregion
+
 					/*
 					 * Other checks and updates will go here.
 					 * 

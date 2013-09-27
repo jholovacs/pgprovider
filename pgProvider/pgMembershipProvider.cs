@@ -644,7 +644,7 @@ namespace pgProvider
 			using (var conn = new NpgsqlConnection(ConnectionString))
 			{
 				conn.Open();
-				using (var comm = new NpgsqlCommand("get_user_by_username", conn))
+				using (var comm = new NpgsqlCommand("get_number_of_users_online", conn))
 				{
 					comm.CommandType = System.Data.CommandType.StoredProcedure;
 					comm.Parameters.Add("session", NpgsqlTypes.NpgsqlDbType.Integer).Value = _SessionTime;

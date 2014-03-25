@@ -1,4 +1,4 @@
-﻿#region Header
+ #region Header
 
 // Solution: pgProvider
 // Project: pgProvider
@@ -239,9 +239,9 @@ namespace pgProvider
                 }
                 Log.Debug(d => d("_MinRequiredPasswordLength: {0}", _MinRequiredPasswordLength));
 
-                if (config["lockoutTime"] != null)
+                if (config["timeToLockout"] != null)
                 {
-                    _LockoutTime = Convert.ToInt32(config["lockoutTime"]);
+                    _LockoutTime = Convert.ToInt32(config["timeToLockout"]);
                     if (_LockoutTime < 0)
                     {
                         throw new ProviderConfigurationException("Minimum lockout time is 0 minutes.");

@@ -671,7 +671,7 @@
             <summary>
             Log a message with the <see cref="F:Common.Logging.LogLevel.Warn"/> level.
             </summary>
-            <param name="formatProvider">An <see cref="T:System.IFormatProvider"/> that supplies culture-specific formatting Warnrmation.</param>
+            <param name="formatProvider">An <see cref="T:System.IFormatProvider"/> that supplies culture-specific formatting Information.</param>
             <param name="format">The format of the message object to log.<see cref="M:System.String.Format(System.String,System.Object[])"/> </param>
             <param name="args"></param>
         </member>
@@ -679,7 +679,7 @@
             <summary>
             Log a message with the <see cref="F:Common.Logging.LogLevel.Warn"/> level.
             </summary>
-            <param name="formatProvider">An <see cref="T:System.IFormatProvider"/> that supplies culture-specific formatting Warnrmation.</param>
+            <param name="formatProvider">An <see cref="T:System.IFormatProvider"/> that supplies culture-specific formatting information.</param>
             <param name="format">The format of the message object to log.<see cref="M:System.String.Format(System.String,System.Object[])"/> </param>
             <param name="exception">The exception to log.</param>
             <param name="args"></param>
@@ -1970,7 +1970,7 @@
             <summary>
             Ignores message.
             </summary>
-            <param name="formatProvider">An <see cref="T:System.IFormatProvider"/> that supplies culture-specific formatting Warnrmation.</param>
+            <param name="formatProvider">An <see cref="T:System.IFormatProvider"/> that supplies culture-specific formatting Information.</param>
             <param name="format">The format of the message object to log.<see cref="M:System.String.Format(System.String,System.Object[])"/> </param>
             <param name="args">the list of message format arguments</param>
         </member>
@@ -1978,7 +1978,7 @@
             <summary>
             Ignores message.
             </summary>
-            <param name="formatProvider">An <see cref="T:System.IFormatProvider"/> that supplies culture-specific formatting Warnrmation.</param>
+            <param name="formatProvider">An <see cref="T:System.IFormatProvider"/> that supplies culture-specific formatting Information.</param>
             <param name="format">The format of the message object to log.<see cref="M:System.String.Format(System.String,System.Object[])"/> </param>
             <param name="exception">The exception to log.</param>
             <param name="args">the list of message format arguments</param>

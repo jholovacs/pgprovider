@@ -13,7 +13,7 @@ namespace pgProvider
         private const string IS_SUPERUSER = "select count(*) from pg_user where usename=current_user and usesuper = true;";
         protected static string _ConnectionStringName;
 
-        internal static void ValidateVersion(string connectionStringName, string owner)
+        public static void ValidateVersion(string connectionStringName, string owner)
         {
             _ConnectionStringName = connectionStringName;
             //open the connection, start the transaction
@@ -176,7 +176,8 @@ namespace pgProvider
             using (var cmd = new Npgsql.NpgsqlCommand(TABLE_EXISTS, conn, trans))
             {
                 cmd.Parameters.Add("@tableName", NpgsqlTypes.NpgsqlDbType.Varchar, 255).Value = tableName;
-                return HasRows(cmd);
+                var exists = (long)cmd.ExecuteScalar();
+	            return (exists > 0);
             }
         }
         protected static bool TableExists(string tableName)

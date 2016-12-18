@@ -111,10 +111,10 @@ namespace pgProvider
 				}
 				_logger.Info(i => i("Added users ({0}) to roles ({1}).", string.Join(", ", usernames), string.Join(", ", roleNames)));
 			}
-			catch (NpgsqlException ex)
+			catch (PostgresException ex)
 			{
 				_logger.Error("Failed to add users to role.", ex);
-				switch (ex.Code)
+				switch (ex.SqlState)
 				{
 					case "MSING":
 						throw new ProviderException("One or more role names and/ or user names specified do not exist in the current application.", ex);
@@ -157,10 +157,10 @@ namespace pgProvider
 					}
 				}
 			}
-			catch (NpgsqlException ex)
+			catch (PostgresException ex)
 			{
 				_logger.Error("Unable to create the specified role.", ex);
-				switch (ex.Code)
+				switch (ex.SqlState)
 				{
 					case "DUPRL":
 						throw new ProviderException("The specified role already exists for this application.", ex);
@@ -190,9 +190,9 @@ namespace pgProvider
 					}
 				}
 			}
-			catch (NpgsqlException ex)
+			catch (PostgresException ex)
 			{
-				switch (ex.Code)
+				switch (ex.SqlState)
 				{
 					case "RLPOP":
 						_logger.Error("The role to be deleted is populated, aborting.", ex);
@@ -227,7 +227,7 @@ namespace pgProvider
 						comm.CommandType = System.Data.CommandType.StoredProcedure;
 						comm.Parameters.Add("_role_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = rolename;
 						comm.Parameters.Add("_application_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
-						comm.Parameters.Add("_partial_user_name", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = usernameToMatch;
+						comm.Parameters.Add("_partial_username", NpgsqlTypes.NpgsqlDbType.Varchar, 250).Value = usernameToMatch;
 						using (var reader = comm.ExecuteReader())
 						{
 							var r = new List<string>();
@@ -241,9 +241,9 @@ namespace pgProvider
 					}
 				}
 			}
-			catch (NpgsqlException ex)
+			catch (PostgresException ex)
 			{
-				switch (ex.Code)
+				switch (ex.SqlState)
 				{
 					case "ROLNA":
 						_logger.Error("The role specified does not exist.", ex);
@@ -329,9 +329,9 @@ namespace pgProvider
 					}
 				}
 			}
-			catch (NpgsqlException ex)
+			catch (PostgresException ex)
 			{
-				switch (ex.Code)
+				switch (ex.SqlState)
 				{
 					case "NOROL":
 						_logger.Error("Role does not exist.", ex);
@@ -371,9 +371,9 @@ namespace pgProvider
 					}
 				}
 			}
-			catch (NpgsqlException ex)
+			catch (PostgresException ex)
 			{
-				if (ex.Code == "MSING")
+				if (ex.SqlState == "MSING")
 				{
 					_logger.Error("One or more role names and/ or user names specified do not exist in the current application.", ex);
 					throw new ProviderException("One or more role names and/ or user names specified do not exist in the current application.", ex);

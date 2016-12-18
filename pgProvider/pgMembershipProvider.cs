@@ -419,10 +419,10 @@ namespace pgProvider
 				_logger.Debug(d => d("Creating user record for '{0}'...", username));
 				var userId = CreateUser(username, email, isApproved);
 			}
-			catch (NpgsqlException ex)
+			catch (PostgresException ex)
 			{
 				_logger.Error("Database Error creating the user record.", ex);
-				switch (ex.Code.ToUpper())
+				switch (ex.SqlState.ToUpper())
 				{
 					case "DUPEM":
 						status = MembershipCreateStatus.DuplicateEmail;
@@ -467,7 +467,7 @@ namespace pgProvider
 				{
 					UpdateQAndA(username, passwordQuestion, passwordAnswer);
 				}
-				catch (NpgsqlException ex)
+				catch (PostgresException ex)
 				{
 					_logger.Error("Database Error updating the password/ answer.", ex);
 					DeleteUser(username, true);
@@ -538,9 +538,9 @@ namespace pgProvider
 					comm.CommandType = CommandType.StoredProcedure;
 					comm.Parameters.Add("_user_name", NpgsqlDbType.Varchar, 250).Value = username;
 					comm.Parameters.Add("_application_name", NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
-					comm.Parameters.Add("questiontext", NpgsqlDbType.Varchar, 1000).Value = question;
-					comm.Parameters.Add("answersalt", NpgsqlDbType.Varchar, 250).Value = salt;
-					comm.Parameters.Add("answerhash", NpgsqlDbType.Bytea).Value = hash;
+					comm.Parameters.Add("_password_question", NpgsqlDbType.Varchar, 1000).Value = question;
+					comm.Parameters.Add("_answer_salt", NpgsqlDbType.Varchar, 250).Value = salt;
+					comm.Parameters.Add("_password_answer", NpgsqlDbType.Bytea).Value = hash;
 					comm.ExecuteNonQuery();
 				}
 			}
@@ -566,9 +566,9 @@ namespace pgProvider
 					comm.CommandType = CommandType.StoredProcedure;
 					comm.Parameters.Add("_user_name", NpgsqlDbType.Varchar, 250).Value = username;
 					comm.Parameters.Add("_application_name", NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
-					comm.Parameters.Add("emailaddress", NpgsqlDbType.Varchar, 250).Value = email;
-					comm.Parameters.Add("approved", NpgsqlDbType.Boolean).Value = isApproved;
-					comm.Parameters.Add("email_is_unique", NpgsqlDbType.Boolean).Value = _RequiresUniqueEmail;
+					comm.Parameters.Add("_email", NpgsqlDbType.Varchar, 250).Value = email;
+					comm.Parameters.Add("_approved", NpgsqlDbType.Boolean).Value = isApproved;
+					comm.Parameters.Add("_email_is_unique", NpgsqlDbType.Boolean).Value = _RequiresUniqueEmail;
 					var retval = Convert.ToInt32(comm.ExecuteScalar());
 					_logger.Debug(d => d("CreateUser('{0}', '{1}', '{2}') complete.", username, email, isApproved));
 					return retval;
@@ -589,7 +589,7 @@ namespace pgProvider
 						comm.CommandType = CommandType.StoredProcedure;
 						comm.Parameters.Add("_user_name", NpgsqlDbType.Varchar, 250).Value = username;
 						comm.Parameters.Add("_application_name", NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
-						comm.Parameters.Add("delete_related", NpgsqlDbType.Boolean).Value = deleteAllRelatedData;
+						comm.Parameters.Add("_delete_related", NpgsqlDbType.Boolean).Value = deleteAllRelatedData;
 						comm.ExecuteNonQuery();
 						return true;
 					}
@@ -714,7 +714,7 @@ namespace pgProvider
 				using (var comm = new NpgsqlCommand("get_number_of_users_online", conn))
 				{
 					comm.CommandType = CommandType.StoredProcedure;
-					comm.Parameters.Add("session", NpgsqlDbType.Integer).Value = _SessionTime;
+					comm.Parameters.Add("_session_timeout", NpgsqlDbType.Integer).Value = _SessionTime;
 					comm.Parameters.Add("_application_name", NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
 					return Convert.ToInt32(comm.ExecuteScalar());
 				}
@@ -753,7 +753,7 @@ namespace pgProvider
 					comm.CommandType = CommandType.StoredProcedure;
 					comm.Parameters.Add("_user_name", NpgsqlDbType.Varchar, 250).Value = username;
 					comm.Parameters.Add("_application_name", NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
-					comm.Parameters.Add("online", NpgsqlDbType.Boolean).Value = userIsOnline;
+					comm.Parameters.Add("_online", NpgsqlDbType.Boolean).Value = userIsOnline;
 					using (var reader = comm.ExecuteReader())
 					{
 						return GetUsersFromReader(reader).OfType<MembershipUser>().FirstOrDefault();
@@ -829,8 +829,8 @@ namespace pgProvider
 				using (var comm = new NpgsqlCommand("get_user_by_id", conn))
 				{
 					comm.CommandType = CommandType.StoredProcedure;
-					comm.Parameters.Add("userid", NpgsqlDbType.Integer).Value = userId;
-					comm.Parameters.Add("online", NpgsqlDbType.Boolean).Value = userIsOnline;
+					comm.Parameters.Add("_user_id", NpgsqlDbType.Integer).Value = userId;
+					comm.Parameters.Add("_online", NpgsqlDbType.Boolean).Value = userIsOnline;
 					using (var reader = comm.ExecuteReader())
 					{
 						return GetUsersFromReader(reader).OfType<MembershipUser>().FirstOrDefault();
@@ -852,7 +852,7 @@ namespace pgProvider
 				using (var comm = new NpgsqlCommand("get_user_name_by_email", conn))
 				{
 					comm.CommandType = CommandType.StoredProcedure;
-					comm.Parameters.Add("emailaddress", NpgsqlDbType.Varchar, 250).Value = email;
+					comm.Parameters.Add("_email", NpgsqlDbType.Varchar, 250).Value = email;
 					comm.Parameters.Add("_application_name", NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
 					return comm.ExecuteScalar().ToString();
 				}
@@ -917,13 +917,13 @@ namespace pgProvider
 					using (var comm = new NpgsqlCommand("update_user", conn))
 					{
 						comm.CommandType = CommandType.StoredProcedure;
-						comm.Parameters.Add("userid", NpgsqlDbType.Integer).Value = (int) user.ProviderUserKey;
+						comm.Parameters.Add("_user_id", NpgsqlDbType.Integer).Value = (int) user.ProviderUserKey;
 						comm.Parameters.Add("_user_name", NpgsqlDbType.Varchar, 250).Value = user.UserName;
 						comm.Parameters.Add("_application_name", NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
-						comm.Parameters.Add("emailaddress", NpgsqlDbType.Varchar, 250).Value = user.Email;
-						comm.Parameters.Add("isapproved", NpgsqlDbType.Boolean).Value = user.IsApproved;
-						comm.Parameters.Add("comments", NpgsqlDbType.Varchar, -1).Value = user.Comment;
-						comm.Parameters.Add("email_is_unique", NpgsqlDbType.Boolean).Value = _RequiresUniqueEmail;
+						comm.Parameters.Add("_email", NpgsqlDbType.Varchar, 250).Value = user.Email;
+						comm.Parameters.Add("_approved", NpgsqlDbType.Boolean).Value = user.IsApproved;
+						comm.Parameters.Add("_comment", NpgsqlDbType.Varchar, -1).Value = user.Comment;
+						comm.Parameters.Add("_email_is_unique", NpgsqlDbType.Boolean).Value = _RequiresUniqueEmail;
 						comm.ExecuteNonQuery();
 						_logger.Info(i => i("User '{0}' has been updated.", user.UserName));
 					}
@@ -1014,11 +1014,11 @@ namespace pgProvider
 						comm.CommandType = CommandType.StoredProcedure;
 						comm.Parameters.Add("_user_name", NpgsqlDbType.Varchar, 250).Value = username;
 						comm.Parameters.Add("_application_name", NpgsqlDbType.Varchar, 250).Value = _ApplicationName;
-						comm.Parameters.Add("origin", NpgsqlDbType.Varchar, 250).Value = string.Format("Machine: {0}, Application: {1}",
+						comm.Parameters.Add("_origin", NpgsqlDbType.Varchar, 250).Value = string.Format("Machine: {0}, Application: {1}",
 							Environment.MachineName, _ApplicationName);
-						comm.Parameters.Add("success_indicator", NpgsqlDbType.Boolean).Value = success;
-						comm.Parameters.Add("attempt_window", NpgsqlDbType.Integer).Value = _PasswordAttemptWindow;
-						comm.Parameters.Add("attempt_count", NpgsqlDbType.Integer).Value = _MaxInvalidPasswordAttempts;
+						comm.Parameters.Add("_success_indicator", NpgsqlDbType.Boolean).Value = success;
+						comm.Parameters.Add("_attempt_window", NpgsqlDbType.Integer).Value = _PasswordAttemptWindow;
+						comm.Parameters.Add("_attempt_count", NpgsqlDbType.Integer).Value = _MaxInvalidPasswordAttempts;
 						comm.ExecuteNonQuery();
 						_logger.Debug(d => d("Login event recorded: {0}, success: {1}", username, success));
 					}
